@@ -5,8 +5,8 @@ import sys
 import time
 from typing import Dict, Any
 
-from projects.trader.smart_contracts.service.config import ADMIN_MNEMONIC, DEFAULT_FUNDING_AMOUNT
-from projects.trader.smart_contracts.service.utils import (
+from projects.source.services.config import ADMIN_MNEMONIC, DEFAULT_FUNDING_AMOUNT
+from projects.source.services.utils import (
     get_algod_client,
     get_account_from_mnemonic,
     get_app_client,

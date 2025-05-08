@@ -3,9 +3,9 @@ import json
 import time
 from typing import Dict, Any, Optional
 
-from projects.trader.smart_contracts.service.admin import ContractAdmin
-from projects.trader.smart_contracts.service.user import ContractUser
-from projects.trader.smart_contracts.service.config import ADMIN_MNEMONIC, USER_MNEMONIC
+from projects.source.services.admin import ContractAdmin
+from projects.source.services.user import ContractUser
+from projects.source.services.config import ADMIN_MNEMONIC, USER_MNEMONIC
 
 # Configure logging
 logger = logging.getLogger("assets_contract.service")

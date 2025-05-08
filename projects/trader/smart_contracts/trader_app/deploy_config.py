@@ -1,4 +1,5 @@
 import logging
+from algopy import Account
 
 import algokit_utils
 
@@ -39,8 +40,6 @@ def deploy() -> None:
         # Initialize the contract with sample values
         g_user_id = bytes("user123", "utf-8")
         g_book_id = bytes("book456", "utf-8")
-        # g_address = bytes("addr456", "utf-8")
-        # g_status = bytes("ACTIVE", "utf-8")
         g_params = bytes("param1:value1|param2:value2", "utf-8")
 
         response = app_client.send.initialize(args=(g_user_id, g_book_id, g_params))

@@ -4,8 +4,8 @@ import logging
 import sys
 from typing import Dict, Any
 
-from projects.trader.smart_contracts.service.config import USER_MNEMONIC
-from projects.trader.smart_contracts.service.utils import (
+from projects.source.services.config import USER_MNEMONIC
+from projects.source.services.utils import (
     get_algod_client,
     get_account_from_mnemonic,
     get_app_client,

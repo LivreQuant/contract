@@ -8,7 +8,7 @@ from smart_contracts.artifacts.assets_contract.assets_contract_client import (
     AssetsContractClient,
     AssetsContractFactory
 )
-from projects.trader.smart_contracts.service.config import (
+from projects.source.services.config import (
     ALGOD_TOKEN, ALGOD_SERVER, ALGOD_PORT,
     INDEXER_TOKEN, INDEXER_SERVER, INDEXER_PORT
 )

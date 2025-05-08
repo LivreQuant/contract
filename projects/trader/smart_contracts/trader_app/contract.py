@@ -2,11 +2,14 @@ from algopy import ARC4Contract, Bytes, String, UInt64, Account, Txn, Global
 from algopy import arc4
 
 
-class TraderApp(ARC4Contract):
+class BookContract(ARC4Contract):
     ##########################
     # Global state variables #
     ##########################
-    # USER_ID = LASTNAME | YYYYMMDD | MOTHERS MAIDEN NAME | FATHERS FIRST NAME | BIRTH_CITY
+    # USER_ID = USER FIRST NAME | USER LAST INITIAL | USER YYYY | USER MM |
+    #           USER BIRTH_CITY | USER BIRTH COUNTRY |
+    #           MOTHERS FIRST NAME | MOTHERS LAST INITIAL | MOTHERS YYYY | MOTHERS MM |
+    #           FATHERS FIRST NAME | FATHERS LAST INITIAL | FATHERS YYYY | FATHERS MM
     g_user_id: Bytes
 
     # BOOK_ID = UNIQUE ID PER BOOK
@@ -34,8 +37,8 @@ class TraderApp(ARC4Contract):
     # PARAMETERS: PLACEHOLDER FOR FUTURE REFERENCE
     l_params: Bytes
 
-    def __init__(self, g_address: Account):
-        self.g_address = g_address
+    def __init__(self) -> None:
+        pass
 
     @arc4.abimethod()
     def initialize(self, user_id: Bytes, book_id: Bytes, parameters: Bytes) -> UInt64:
@@ -43,6 +46,7 @@ class TraderApp(ARC4Contract):
         # Set global state
         self.g_user_id = user_id
         self.g_book_id = book_id
+        self.g_address = Account("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ")
         self.g_params = parameters
         self.g_status = String("ACTIVE")
 

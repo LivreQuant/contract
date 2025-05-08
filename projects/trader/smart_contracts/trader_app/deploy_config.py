@@ -1,5 +1,4 @@
 import logging
-from algopy import Account
 
 import algokit_utils
 

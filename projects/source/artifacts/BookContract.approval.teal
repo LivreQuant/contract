@@ -3,24 +3,24 @@
 
 // projects.trader.smart_contracts.trader_app.contract.BookContract.__algopy_entrypoint_with_init() -> uint64:
 main:
-    intcblock 1 0
-    bytecblock 0x151f7c75 "g_status" "g_address" 0x4e414e "ACTIVE" "l_book_hash" "l_research_hash" "l_params" "g_params" "INACTIVE-STOP" "INACTIVE-SOLD"
+    intcblock 0 1
+    bytecblock 0x151f7c75 "g_status" "g_address" 0x4e414e "ACTIVE" "l_book_hash" "l_research_hash" "l_params" "g_user_id" "g_book_id" "g_params"
     // trader_app/contract.py:5
     // class BookContract(ARC4Contract):
     txn NumAppArgs
-    bz main_bare_routing@13
-    pushbytess 0x2325f9af 0x8789bcdb 0xabe79c1f 0x8ba817fe 0xc3bd3df5 0xfa98abdf 0xa1d81bd3 0x20bef5f7 // method "initialize(byte[],byte[],byte[])uint64", method "opt_in()uint64", method "close_out()uint64", method "update_address(account)uint64", method "update_params(byte[])uint64", method "update_status(string)uint64", method "update_local(byte[],byte[],byte[])uint64", method "delete_application()uint64"
+    bz main_bare_routing@12
+    pushbytess 0x2325f9af 0x8789bcdb 0xabe79c1f 0x8af67f50 0xfa98abdf 0xa1d81bd3 0x20bef5f7 // method "initialize(byte[],byte[],byte[])uint64", method "opt_in()uint64", method "close_out()uint64", method "update_global(byte[],byte[],account,byte[])uint64", method "update_status(string)uint64", method "update_local(byte[],byte[],byte[])uint64", method "delete_application()uint64"
     txna ApplicationArgs 0
-    match main_initialize_route@5 main_opt_in_route@6 main_close_out_route@7 main_update_address_route@8 main_update_params_route@9 main_update_status_route@10 main_update_local_route@11 main_delete_application_route@12
+    match main_initialize_route@5 main_opt_in_route@6 main_close_out_route@7 main_update_global_route@8 main_update_status_route@9 main_update_local_route@10 main_delete_application_route@11
 
-main_after_if_else@15:
+main_after_if_else@14:
     // trader_app/contract.py:5
     // class BookContract(ARC4Contract):
-    intc_1 // 0
+    intc_0 // 0
     return
 
-main_delete_application_route@12:
-    // trader_app/contract.py:132
+main_delete_application_route@11:
+    // trader_app/contract.py:145
     // @arc4.abimethod(allow_actions=["DeleteApplication"])
     txn OnCompletion
     pushint 5 // DeleteApplication
@@ -34,11 +34,11 @@ main_delete_application_route@12:
     swap
     concat
     log
-    intc_0 // 1
+    intc_1 // 1
     return
 
-main_update_local_route@11:
-    // trader_app/contract.py:114
+main_update_local_route@10:
+    // trader_app/contract.py:121
     // @arc4.abimethod()
     txn OnCompletion
     !
@@ -53,7 +53,7 @@ main_update_local_route@11:
     extract 2 0
     txna ApplicationArgs 3
     extract 2 0
-    // trader_app/contract.py:114
+    // trader_app/contract.py:121
     // @arc4.abimethod()
     callsub update_local
     itob
@@ -61,11 +61,11 @@ main_update_local_route@11:
     swap
     concat
     log
-    intc_0 // 1
+    intc_1 // 1
     return
 
-main_update_status_route@10:
-    // trader_app/contract.py:101
+main_update_status_route@9:
+    // trader_app/contract.py:111
     // @arc4.abimethod()
     txn OnCompletion
     !
@@ -76,7 +76,7 @@ main_update_status_route@10:
     // class BookContract(ARC4Contract):
     txna ApplicationArgs 1
     extract 2 0
-    // trader_app/contract.py:101
+    // trader_app/contract.py:111
     // @arc4.abimethod()
     callsub update_status
     itob
@@ -84,11 +84,11 @@ main_update_status_route@10:
     swap
     concat
     log
-    intc_0 // 1
+    intc_1 // 1
     return
 
-main_update_params_route@9:
-    // trader_app/contract.py:90
+main_update_global_route@8:
+    // trader_app/contract.py:84
     // @arc4.abimethod()
     txn OnCompletion
     !
@@ -99,43 +99,26 @@ main_update_params_route@9:
     // class BookContract(ARC4Contract):
     txna ApplicationArgs 1
     extract 2 0
-    // trader_app/contract.py:90
-    // @arc4.abimethod()
-    callsub update_params
-    itob
-    bytec_0 // 0x151f7c75
-    swap
-    concat
-    log
-    intc_0 // 1
-    return
-
-main_update_address_route@8:
-    // trader_app/contract.py:79
-    // @arc4.abimethod()
-    txn OnCompletion
-    !
-    assert // OnCompletion is not NoOp
-    txn ApplicationID
-    assert // can only call when not creating
-    // trader_app/contract.py:5
-    // class BookContract(ARC4Contract):
-    txna ApplicationArgs 1
+    txna ApplicationArgs 2
+    extract 2 0
+    txna ApplicationArgs 3
     btoi
     txnas Accounts
-    // trader_app/contract.py:79
+    txna ApplicationArgs 4
+    extract 2 0
+    // trader_app/contract.py:84
     // @arc4.abimethod()
-    callsub update_address
+    callsub update_global
     itob
     bytec_0 // 0x151f7c75
     swap
     concat
     log
-    intc_0 // 1
+    intc_1 // 1
     return
 
 main_close_out_route@7:
-    // trader_app/contract.py:66
+    // trader_app/contract.py:71
     // @arc4.abimethod(allow_actions=["CloseOut"])
     txn OnCompletion
     pushint 2 // CloseOut
@@ -149,14 +132,14 @@ main_close_out_route@7:
     swap
     concat
     log
-    intc_0 // 1
+    intc_1 // 1
     return
 
 main_opt_in_route@6:
-    // trader_app/contract.py:52
+    // trader_app/contract.py:57
     // @arc4.abimethod(allow_actions=["OptIn"])
     txn OnCompletion
-    intc_0 // OptIn
+    intc_1 // OptIn
     ==
     assert // OnCompletion is not OptIn
     txn ApplicationID
@@ -167,11 +150,11 @@ main_opt_in_route@6:
     swap
     concat
     log
-    intc_0 // 1
+    intc_1 // 1
     return
 
 main_initialize_route@5:
-    // trader_app/contract.py:40
+    // trader_app/contract.py:43
     // @arc4.abimethod()
     txn OnCompletion
     !
@@ -186,7 +169,7 @@ main_initialize_route@5:
     extract 2 0
     txna ApplicationArgs 3
     extract 2 0
-    // trader_app/contract.py:40
+    // trader_app/contract.py:43
     // @arc4.abimethod()
     callsub initialize
     itob
@@ -194,428 +177,455 @@ main_initialize_route@5:
     swap
     concat
     log
-    intc_0 // 1
+    intc_1 // 1
     return
 
-main_bare_routing@13:
+main_bare_routing@12:
     // trader_app/contract.py:5
     // class BookContract(ARC4Contract):
     txn OnCompletion
-    bnz main_after_if_else@15
+    bnz main_after_if_else@14
     txn ApplicationID
     !
     assert // can only call when creating
-    intc_0 // 1
+    intc_1 // 1
     return
 
 
 // projects.trader.smart_contracts.trader_app.contract.BookContract.initialize(user_id: bytes, book_id: bytes, parameters: bytes) -> uint64:
 initialize:
-    // trader_app/contract.py:40-41
+    // trader_app/contract.py:43-44
     // @arc4.abimethod()
     // def initialize(self, user_id: Bytes, book_id: Bytes, parameters: Bytes) -> UInt64:
     proto 3 1
-    // trader_app/contract.py:43-44
+    // trader_app/contract.py:46-47
     // # Set global state
     // self.g_user_id = user_id
-    pushbytes "g_user_id"
+    bytec 8 // "g_user_id"
     frame_dig -3
     app_global_put
-    // trader_app/contract.py:45
+    // trader_app/contract.py:48
     // self.g_book_id = book_id
-    pushbytes "g_book_id"
+    bytec 9 // "g_book_id"
     frame_dig -2
     app_global_put
-    // trader_app/contract.py:46
-    // self.g_address = Account("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ")
+    // trader_app/contract.py:49
+    // self.g_address = Account(
     bytec_2 // "g_address"
+    // trader_app/contract.py:49-51
+    // self.g_address = Account(
+    //     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
+    // )
     pushbytes base32(AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA) // addr AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ
     app_global_put
-    // trader_app/contract.py:47
+    // trader_app/contract.py:52
     // self.g_params = parameters
-    bytec 8 // "g_params"
+    bytec 10 // "g_params"
     frame_dig -1
     app_global_put
-    // trader_app/contract.py:48
+    // trader_app/contract.py:53
     // self.g_status = String("ACTIVE")
     bytec_1 // "g_status"
     bytec 4 // "ACTIVE"
     app_global_put
-    // trader_app/contract.py:50
+    // trader_app/contract.py:55
     // return UInt64(1)
-    intc_0 // 1
+    intc_1 // 1
     retsub
 
 
 // projects.trader.smart_contracts.trader_app.contract.BookContract.opt_in() -> uint64:
 opt_in:
-    // trader_app/contract.py:55-56
+    // trader_app/contract.py:60-61
     // # Validate that only the specified user can opt in
     // assert Txn.sender == self.g_address, "Only authorized user can opt in"
     txn Sender
-    intc_1 // 0
+    intc_0 // 0
     bytec_2 // "g_address"
     app_global_get_ex
     assert // check self.g_address exists
     ==
     assert // Only authorized user can opt in
-    // trader_app/contract.py:57
+    // trader_app/contract.py:62
     // assert self.g_status == String("ACTIVE"), "Contract must be active"
-    intc_1 // 0
+    intc_0 // 0
     bytec_1 // "g_status"
     app_global_get_ex
     assert // check self.g_status exists
     bytec 4 // "ACTIVE"
     ==
     assert // Contract must be active
-    // trader_app/contract.py:59-60
+    // trader_app/contract.py:64-65
     // # Initialize local state
     // self.l_book_hash = Bytes(b"NAN")
     bytec 5 // "l_book_hash"
     bytec_3 // 0x4e414e
     app_global_put
-    // trader_app/contract.py:61
+    // trader_app/contract.py:66
     // self.l_research_hash = Bytes(b"NAN")
     bytec 6 // "l_research_hash"
     bytec_3 // 0x4e414e
     app_global_put
-    // trader_app/contract.py:62
+    // trader_app/contract.py:67
     // self.l_params = Bytes(b"NAN")
     bytec 7 // "l_params"
     bytec_3 // 0x4e414e
     app_global_put
-    // trader_app/contract.py:64
+    // trader_app/contract.py:69
     // return UInt64(1)
-    intc_0 // 1
+    intc_1 // 1
     retsub
 
 
 // projects.trader.smart_contracts.trader_app.contract.BookContract.close_out() -> uint64:
 close_out:
-    // trader_app/contract.py:69
+    // trader_app/contract.py:74
     // assert Txn.sender == self.g_address, "Only authorized user can close out"
     txn Sender
-    intc_1 // 0
+    intc_0 // 0
     bytec_2 // "g_address"
     app_global_get_ex
     assert // check self.g_address exists
     ==
     assert // Only authorized user can close out
-    // trader_app/contract.py:70
+    // trader_app/contract.py:75
     // assert self.g_status == String("ACTIVE"), "Contract must be active"
-    intc_1 // 0
+    intc_0 // 0
     bytec_1 // "g_status"
     app_global_get_ex
     assert // check self.g_status exists
     bytec 4 // "ACTIVE"
     ==
     assert // Contract must be active
-    // trader_app/contract.py:72-73
+    // trader_app/contract.py:77-78
     // # Reset local state (though this is unnecessary as values will be deleted)
     // self.l_book_hash = Bytes(b"NAN")
     bytec 5 // "l_book_hash"
     bytec_3 // 0x4e414e
     app_global_put
-    // trader_app/contract.py:74
+    // trader_app/contract.py:79
     // self.l_research_hash = Bytes(b"NAN")
     bytec 6 // "l_research_hash"
     bytec_3 // 0x4e414e
     app_global_put
-    // trader_app/contract.py:75
+    // trader_app/contract.py:80
     // self.l_params = Bytes(b"NAN")
     bytec 7 // "l_params"
     bytec_3 // 0x4e414e
     app_global_put
-    // trader_app/contract.py:77
+    // trader_app/contract.py:82
     // return UInt64(1)
-    intc_0 // 1
+    intc_1 // 1
     retsub
 
 
-// projects.trader.smart_contracts.trader_app.contract.BookContract.update_address(new_address: bytes) -> uint64:
-update_address:
-    // trader_app/contract.py:79-80
+// projects.trader.smart_contracts.trader_app.contract.BookContract.update_global(new_user_id: bytes, new_book_id: bytes, new_address: bytes, new_params: bytes) -> uint64:
+update_global:
+    // trader_app/contract.py:84-91
     // @arc4.abimethod()
-    // def update_address(self, new_address: Account) -> UInt64:
-    proto 1 1
-    // trader_app/contract.py:82
-    // assert Txn.sender == Global.creator_address, "Only creator can supdate parameters"
+    // def update_global(
+    //     self,
+    //     new_user_id: Bytes,
+    //     new_book_id: Bytes,
+    //     new_address: Account,
+    //     new_params: Bytes,
+    // ) -> UInt64:
+    proto 4 1
+    // trader_app/contract.py:94
+    // Txn.sender == Global.creator_address
     txn Sender
     global CreatorAddress
     ==
+    // trader_app/contract.py:93-95
+    // assert (
+    //     Txn.sender == Global.creator_address
+    // ), "Only creator can supdate parameters"
     assert // Only creator can supdate parameters
-    // trader_app/contract.py:83
-    // assert self.g_address != new_address, "New parameters must be different"
-    intc_1 // 0
+    // trader_app/contract.py:97
+    // (self.g_user_id != new_user_id)
+    intc_0 // 0
+    bytec 8 // "g_user_id"
+    app_global_get_ex
+    assert // check self.g_user_id exists
+    frame_dig -4
+    !=
+    // trader_app/contract.py:97-100
+    // (self.g_user_id != new_user_id)
+    // or (self.g_book_id != new_book_id)
+    // or (self.g_address != new_address)
+    // or (self.g_params != new_params)
+    bnz update_global_bool_true@4
+    // trader_app/contract.py:98
+    // or (self.g_book_id != new_book_id)
+    intc_0 // 0
+    bytec 9 // "g_book_id"
+    app_global_get_ex
+    assert // check self.g_book_id exists
+    frame_dig -3
+    !=
+    // trader_app/contract.py:97-100
+    // (self.g_user_id != new_user_id)
+    // or (self.g_book_id != new_book_id)
+    // or (self.g_address != new_address)
+    // or (self.g_params != new_params)
+    bnz update_global_bool_true@4
+    // trader_app/contract.py:99
+    // or (self.g_address != new_address)
+    intc_0 // 0
     bytec_2 // "g_address"
     app_global_get_ex
     assert // check self.g_address exists
-    frame_dig -1
+    frame_dig -2
     !=
-    assert // New parameters must be different
-    // trader_app/contract.py:85-86
-    // # Update global parameters
-    // self.g_address = new_address
-    bytec_2 // "g_address"
-    frame_dig -1
-    app_global_put
-    // trader_app/contract.py:88
-    // return UInt64(1)
-    intc_0 // 1
-    retsub
-
-
-// projects.trader.smart_contracts.trader_app.contract.BookContract.update_params(new_params: bytes) -> uint64:
-update_params:
-    // trader_app/contract.py:90-91
-    // @arc4.abimethod()
-    // def update_params(self, new_params: Bytes) -> UInt64:
-    proto 1 1
-    // trader_app/contract.py:93
-    // assert Txn.sender == Global.creator_address, "Only creator can update parameters"
-    txn Sender
-    global CreatorAddress
-    ==
-    assert // Only creator can update parameters
-    // trader_app/contract.py:94
-    // assert self.g_params != new_params, "New parameters must be different"
-    intc_1 // 0
-    bytec 8 // "g_params"
+    // trader_app/contract.py:97-100
+    // (self.g_user_id != new_user_id)
+    // or (self.g_book_id != new_book_id)
+    // or (self.g_address != new_address)
+    // or (self.g_params != new_params)
+    bnz update_global_bool_true@4
+    // trader_app/contract.py:100
+    // or (self.g_params != new_params)
+    intc_0 // 0
+    bytec 10 // "g_params"
     app_global_get_ex
     assert // check self.g_params exists
     frame_dig -1
     !=
+    // trader_app/contract.py:97-100
+    // (self.g_user_id != new_user_id)
+    // or (self.g_book_id != new_book_id)
+    // or (self.g_address != new_address)
+    // or (self.g_params != new_params)
+    bz update_global_bool_false@5
+
+update_global_bool_true@4:
+    intc_1 // 1
+
+update_global_bool_merge@6:
+    // trader_app/contract.py:96-101
+    // assert (
+    //     (self.g_user_id != new_user_id)
+    //     or (self.g_book_id != new_book_id)
+    //     or (self.g_address != new_address)
+    //     or (self.g_params != new_params)
+    // ), "New parameters must be different"
     assert // New parameters must be different
-    // trader_app/contract.py:96-97
+    // trader_app/contract.py:103-104
     // # Update global parameters
+    // self.g_user_id = new_user_id
+    bytec 8 // "g_user_id"
+    frame_dig -4
+    app_global_put
+    // trader_app/contract.py:105
+    // self.g_book_id = new_book_id
+    bytec 9 // "g_book_id"
+    frame_dig -3
+    app_global_put
+    // trader_app/contract.py:106
+    // self.g_address = new_address
+    bytec_2 // "g_address"
+    frame_dig -2
+    app_global_put
+    // trader_app/contract.py:107
     // self.g_params = new_params
-    bytec 8 // "g_params"
+    bytec 10 // "g_params"
     frame_dig -1
     app_global_put
-    // trader_app/contract.py:99
+    // trader_app/contract.py:109
     // return UInt64(1)
-    intc_0 // 1
+    intc_1 // 1
     retsub
+
+update_global_bool_false@5:
+    intc_0 // 0
+    b update_global_bool_merge@6
 
 
 // projects.trader.smart_contracts.trader_app.contract.BookContract.update_status(new_status: bytes) -> uint64:
 update_status:
-    // trader_app/contract.py:101-102
+    // trader_app/contract.py:111-112
     // @arc4.abimethod()
     // def update_status(self, new_status: String) -> UInt64:
     proto 1 1
-    // trader_app/contract.py:104
+    // trader_app/contract.py:114
     // assert Txn.sender == Global.creator_address, "Only creator can update status"
     txn Sender
     global CreatorAddress
     ==
     assert // Only creator can update status
-    // trader_app/contract.py:105
-    // assert (new_status == String("ACTIVE") or
-    frame_dig -1
-    bytec 4 // "ACTIVE"
-    ==
-    // trader_app/contract.py:105-107
-    // assert (new_status == String("ACTIVE") or
-    //         new_status == String("INACTIVE-STOP") or
-    //         new_status == String("INACTIVE-SOLD")), "Status must be ACTIVE or INACTIVE-STOP or INACTIVE-SOLD"
-    bnz update_status_bool_true@3
-    // trader_app/contract.py:106
-    // new_status == String("INACTIVE-STOP") or
-    frame_dig -1
-    bytec 9 // "INACTIVE-STOP"
-    ==
-    // trader_app/contract.py:105-107
-    // assert (new_status == String("ACTIVE") or
-    //         new_status == String("INACTIVE-STOP") or
-    //         new_status == String("INACTIVE-SOLD")), "Status must be ACTIVE or INACTIVE-STOP or INACTIVE-SOLD"
-    bnz update_status_bool_true@3
-    // trader_app/contract.py:107
-    // new_status == String("INACTIVE-SOLD")), "Status must be ACTIVE or INACTIVE-STOP or INACTIVE-SOLD"
-    frame_dig -1
-    bytec 10 // "INACTIVE-SOLD"
-    ==
-    // trader_app/contract.py:105-107
-    // assert (new_status == String("ACTIVE") or
-    //         new_status == String("INACTIVE-STOP") or
-    //         new_status == String("INACTIVE-SOLD")), "Status must be ACTIVE or INACTIVE-STOP or INACTIVE-SOLD"
-    bz update_status_bool_false@4
-
-update_status_bool_true@3:
-    intc_0 // 1
-
-update_status_bool_merge@5:
-    // trader_app/contract.py:105-107
-    // assert (new_status == String("ACTIVE") or
-    //         new_status == String("INACTIVE-STOP") or
-    //         new_status == String("INACTIVE-SOLD")), "Status must be ACTIVE or INACTIVE-STOP or INACTIVE-SOLD"
-    assert // Status must be ACTIVE or INACTIVE-STOP or INACTIVE-SOLD
-    // trader_app/contract.py:109-110
+    // trader_app/contract.py:116-117
     // # Update global status
     // self.g_status = new_status
     bytec_1 // "g_status"
     frame_dig -1
     app_global_put
-    // trader_app/contract.py:112
+    // trader_app/contract.py:119
     // return UInt64(1)
-    intc_0 // 1
+    intc_1 // 1
     retsub
-
-update_status_bool_false@4:
-    intc_1 // 0
-    b update_status_bool_merge@5
 
 
 // projects.trader.smart_contracts.trader_app.contract.BookContract.update_local(book_hash: bytes, research_hash: bytes, params: bytes) -> uint64:
 update_local:
-    // trader_app/contract.py:114-115
+    // trader_app/contract.py:121-124
     // @arc4.abimethod()
-    // def update_local(self, book_hash: Bytes, research_hash: Bytes, params: Bytes) -> UInt64:
+    // def update_local(
+    //     self, book_hash: Bytes, research_hash: Bytes, params: Bytes
+    // ) -> UInt64:
     proto 3 1
-    // trader_app/contract.py:117
-    // assert Txn.sender == self.g_address, "Only authorized user can update local state"
+    // trader_app/contract.py:127
+    // Txn.sender == self.g_address
     txn Sender
-    intc_1 // 0
+    intc_0 // 0
     bytec_2 // "g_address"
     app_global_get_ex
     assert // check self.g_address exists
     ==
+    // trader_app/contract.py:126-128
+    // assert (
+    //     Txn.sender == self.g_address
+    // ), "Only authorized user can update local state"
     assert // Only authorized user can update local state
-    // trader_app/contract.py:118
+    // trader_app/contract.py:129
     // assert self.g_status == String("ACTIVE"), "Contract must be active"
-    intc_1 // 0
+    intc_0 // 0
     bytec_1 // "g_status"
     app_global_get_ex
     assert // check self.g_status exists
     bytec 4 // "ACTIVE"
     ==
     assert // Contract must be active
-    // trader_app/contract.py:120-121
-    // # Ensure at least one value is changing
-    // assert (self.l_book_hash != book_hash or
-    intc_1 // 0
+    // trader_app/contract.py:133
+    // self.l_book_hash != book_hash
+    intc_0 // 0
     bytec 5 // "l_book_hash"
     app_global_get_ex
     assert // check self.l_book_hash exists
     frame_dig -3
     !=
-    // trader_app/contract.py:120-123
-    // # Ensure at least one value is changing
-    // assert (self.l_book_hash != book_hash or
-    //         self.l_research_hash != research_hash or
-    //         self.l_params != params), "At least one parameter must change"
+    // trader_app/contract.py:133-135
+    // self.l_book_hash != book_hash
+    // or self.l_research_hash != research_hash
+    // or self.l_params != params
     bnz update_local_bool_true@3
-    // trader_app/contract.py:122
-    // self.l_research_hash != research_hash or
-    intc_1 // 0
+    // trader_app/contract.py:134
+    // or self.l_research_hash != research_hash
+    intc_0 // 0
     bytec 6 // "l_research_hash"
     app_global_get_ex
     assert // check self.l_research_hash exists
     frame_dig -2
     !=
-    // trader_app/contract.py:120-123
-    // # Ensure at least one value is changing
-    // assert (self.l_book_hash != book_hash or
-    //         self.l_research_hash != research_hash or
-    //         self.l_params != params), "At least one parameter must change"
+    // trader_app/contract.py:133-135
+    // self.l_book_hash != book_hash
+    // or self.l_research_hash != research_hash
+    // or self.l_params != params
     bnz update_local_bool_true@3
-    // trader_app/contract.py:123
-    // self.l_params != params), "At least one parameter must change"
-    intc_1 // 0
+    // trader_app/contract.py:135
+    // or self.l_params != params
+    intc_0 // 0
     bytec 7 // "l_params"
     app_global_get_ex
     assert // check self.l_params exists
     frame_dig -1
     !=
-    // trader_app/contract.py:120-123
-    // # Ensure at least one value is changing
-    // assert (self.l_book_hash != book_hash or
-    //         self.l_research_hash != research_hash or
-    //         self.l_params != params), "At least one parameter must change"
+    // trader_app/contract.py:133-135
+    // self.l_book_hash != book_hash
+    // or self.l_research_hash != research_hash
+    // or self.l_params != params
     bz update_local_bool_false@4
 
 update_local_bool_true@3:
-    intc_0 // 1
+    intc_1 // 1
 
 update_local_bool_merge@5:
-    // trader_app/contract.py:120-123
+    // trader_app/contract.py:131-136
     // # Ensure at least one value is changing
-    // assert (self.l_book_hash != book_hash or
-    //         self.l_research_hash != research_hash or
-    //         self.l_params != params), "At least one parameter must change"
+    // assert (
+    //     self.l_book_hash != book_hash
+    //     or self.l_research_hash != research_hash
+    //     or self.l_params != params
+    // ), "At least one parameter must change"
     assert // At least one parameter must change
-    // trader_app/contract.py:125-126
+    // trader_app/contract.py:138-139
     // # Update local state
     // self.l_book_hash = book_hash
     bytec 5 // "l_book_hash"
     frame_dig -3
     app_global_put
-    // trader_app/contract.py:127
+    // trader_app/contract.py:140
     // self.l_research_hash = research_hash
     bytec 6 // "l_research_hash"
     frame_dig -2
     app_global_put
-    // trader_app/contract.py:128
+    // trader_app/contract.py:141
     // self.l_params = params
     bytec 7 // "l_params"
     frame_dig -1
     app_global_put
-    // trader_app/contract.py:130
+    // trader_app/contract.py:143
     // return UInt64(1)
-    intc_0 // 1
+    intc_1 // 1
     retsub
 
 update_local_bool_false@4:
-    intc_1 // 0
+    intc_0 // 0
     b update_local_bool_merge@5
 
 
 // projects.trader.smart_contracts.trader_app.contract.BookContract.delete_application() -> uint64:
 delete_application:
-    // trader_app/contract.py:135
-    // assert Txn.sender == Global.creator_address, "Only creator can delete application"
+    // trader_app/contract.py:149
+    // Txn.sender == Global.creator_address
     txn Sender
     global CreatorAddress
     ==
+    // trader_app/contract.py:148-150
+    // assert (
+    //     Txn.sender == Global.creator_address
+    // ), "Only creator can delete application"
     assert // Only creator can delete application
-    // trader_app/contract.py:136
-    // assert (self.g_status == String("INACTIVE-STOP") or
-    intc_1 // 0
+    // trader_app/contract.py:151
+    // assert self.g_status == String("INACTIVE-STOP") or self.g_status == String(
+    intc_0 // 0
     bytec_1 // "g_status"
     app_global_get_ex
     assert // check self.g_status exists
-    bytec 9 // "INACTIVE-STOP"
+    pushbytes "INACTIVE-STOP"
     ==
-    // trader_app/contract.py:136-137
-    // assert (self.g_status == String("INACTIVE-STOP") or
-    //         self.g_status == String("INACTIVE-SOLD")), "Contract must be inactive to delete"
+    // trader_app/contract.py:151-153
+    // assert self.g_status == String("INACTIVE-STOP") or self.g_status == String(
+    //     "INACTIVE-SOLD"
+    // ), "Contract must be inactive to delete"
     bnz delete_application_bool_true@2
-    // trader_app/contract.py:137
-    // self.g_status == String("INACTIVE-SOLD")), "Contract must be inactive to delete"
-    intc_1 // 0
+    // trader_app/contract.py:151
+    // assert self.g_status == String("INACTIVE-STOP") or self.g_status == String(
+    intc_0 // 0
     bytec_1 // "g_status"
     app_global_get_ex
     assert // check self.g_status exists
-    bytec 10 // "INACTIVE-SOLD"
+    // trader_app/contract.py:151-153
+    // assert self.g_status == String("INACTIVE-STOP") or self.g_status == String(
+    //     "INACTIVE-SOLD"
+    // ), "Contract must be inactive to delete"
+    pushbytes "INACTIVE-SOLD"
     ==
-    // trader_app/contract.py:136-137
-    // assert (self.g_status == String("INACTIVE-STOP") or
-    //         self.g_status == String("INACTIVE-SOLD")), "Contract must be inactive to delete"
     bz delete_application_bool_false@3
 
 delete_application_bool_true@2:
-    intc_0 // 1
+    intc_1 // 1
 
 delete_application_bool_merge@4:
-    // trader_app/contract.py:136-137
-    // assert (self.g_status == String("INACTIVE-STOP") or
-    //         self.g_status == String("INACTIVE-SOLD")), "Contract must be inactive to delete"
+    // trader_app/contract.py:151-153
+    // assert self.g_status == String("INACTIVE-STOP") or self.g_status == String(
+    //     "INACTIVE-SOLD"
+    // ), "Contract must be inactive to delete"
     assert // Contract must be inactive to delete
-    // trader_app/contract.py:139
+    // trader_app/contract.py:155
     // return UInt64(1)
-    intc_0 // 1
+    intc_1 // 1
     retsub
 
 delete_application_bool_false@3:
-    intc_1 // 0
+    intc_0 // 0
     b delete_application_bool_merge@4

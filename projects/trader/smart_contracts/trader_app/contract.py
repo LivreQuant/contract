@@ -46,7 +46,9 @@ class BookContract(ARC4Contract):
         # Set global state
         self.g_user_id = user_id
         self.g_book_id = book_id
-        self.g_address = Account("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ")
+        self.g_address = Account(
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
+        )
         self.g_params = parameters
         self.g_status = String("ACTIVE")
 
@@ -80,23 +82,28 @@ class BookContract(ARC4Contract):
         return UInt64(1)
 
     @arc4.abimethod()
-    def update_address(self, new_address: Account) -> UInt64:
+    def update_global(
+        self,
+        new_user_id: Bytes,
+        new_book_id: Bytes,
+        new_address: Account,
+        new_params: Bytes,
+    ) -> UInt64:
         """Update the global parameters of the contract."""
-        assert Txn.sender == Global.creator_address, "Only creator can supdate parameters"
-        assert self.g_address != new_address, "New parameters must be different"
+        assert (
+            Txn.sender == Global.creator_address
+        ), "Only creator can supdate parameters"
+        assert (
+            (self.g_user_id != new_user_id)
+            or (self.g_book_id != new_book_id)
+            or (self.g_address != new_address)
+            or (self.g_params != new_params)
+        ), "New parameters must be different"
 
         # Update global parameters
+        self.g_user_id = new_user_id
+        self.g_book_id = new_book_id
         self.g_address = new_address
-
-        return UInt64(1)
-
-    @arc4.abimethod()
-    def update_params(self, new_params: Bytes) -> UInt64:
-        """Update the global parameters of the contract."""
-        assert Txn.sender == Global.creator_address, "Only creator can update parameters"
-        assert self.g_params != new_params, "New parameters must be different"
-
-        # Update global parameters
         self.g_params = new_params
 
         return UInt64(1)
@@ -105,9 +112,6 @@ class BookContract(ARC4Contract):
     def update_status(self, new_status: String) -> UInt64:
         """Update the status of the contract."""
         assert Txn.sender == Global.creator_address, "Only creator can update status"
-        assert (new_status == String("ACTIVE") or
-                new_status == String("INACTIVE-STOP") or
-                new_status == String("INACTIVE-SOLD")), "Status must be ACTIVE or INACTIVE-STOP or INACTIVE-SOLD"
 
         # Update global status
         self.g_status = new_status
@@ -115,15 +119,21 @@ class BookContract(ARC4Contract):
         return UInt64(1)
 
     @arc4.abimethod()
-    def update_local(self, book_hash: Bytes, research_hash: Bytes, params: Bytes) -> UInt64:
+    def update_local(
+        self, book_hash: Bytes, research_hash: Bytes, params: Bytes
+    ) -> UInt64:
         """Update the local state for the user."""
-        assert Txn.sender == self.g_address, "Only authorized user can update local state"
+        assert (
+            Txn.sender == self.g_address
+        ), "Only authorized user can update local state"
         assert self.g_status == String("ACTIVE"), "Contract must be active"
 
         # Ensure at least one value is changing
-        assert (self.l_book_hash != book_hash or
-                self.l_research_hash != research_hash or
-                self.l_params != params), "At least one parameter must change"
+        assert (
+            self.l_book_hash != book_hash
+            or self.l_research_hash != research_hash
+            or self.l_params != params
+        ), "At least one parameter must change"
 
         # Update local state
         self.l_book_hash = book_hash
@@ -135,8 +145,11 @@ class BookContract(ARC4Contract):
     @arc4.abimethod(allow_actions=["DeleteApplication"])
     def delete_application(self) -> UInt64:
         """Delete the contract if it's inactive."""
-        assert Txn.sender == Global.creator_address, "Only creator can delete application"
-        assert (self.g_status == String("INACTIVE-STOP") or
-                self.g_status == String("INACTIVE-SOLD")), "Contract must be inactive to delete"
+        assert (
+            Txn.sender == Global.creator_address
+        ), "Only creator can delete application"
+        assert self.g_status == String("INACTIVE-STOP") or self.g_status == String(
+            "INACTIVE-SOLD"
+        ), "Contract must be inactive to delete"
 
         return UInt64(1)

@@ -7,16 +7,16 @@ logger = logging.getLogger(__name__)
 
 # define deployment behaviour based on supplied app spec
 def deploy() -> None:
-    from smart_contracts.artifacts.assets_contract.assets_contract_client import (
-        AssetsContractClient,
-        AssetsContractFactory,
+    from smart_contracts.artifacts.book_contract.book_contract_client import (
+        BookContractClient,
+        BookContractFactory,
     )
 
     algorand = algokit_utils.AlgorandClient.from_environment()
     deployer = algorand.account.from_environment("DEPLOYER")
 
     factory = algorand.client.get_typed_app_factory(
-        AssetsContractFactory, default_sender=deployer.address
+        BookContractFactory, default_sender=deployer.address
     )
 
     app_client, result = factory.deploy(
@@ -37,12 +37,14 @@ def deploy() -> None:
         )
 
         # Initialize the contract with sample values
-        user_id = bytes("user123", "utf-8")
-        asset_id = bytes("asset456", "utf-8")
-        parameters = bytes("param1:value1|param2:value2", "utf-8")
+        g_user_id = bytes("user123", "utf-8")
+        g_book_id = bytes("book456", "utf-8")
+        # g_address = bytes("addr456", "utf-8")
+        # g_status = bytes("ACTIVE", "utf-8")
+        g_params = bytes("param1:value1|param2:value2", "utf-8")
 
-        response = app_client.send.initialize(args=(user_id, asset_id, parameters))
+        response = app_client.send.initialize(args=(g_user_id, g_book_id, g_params))
         logger.info(
             f"Initialized {app_client.app_name} ({app_client.app_id}) with "
-            f"user_id={user_id}, asset_id={asset_id}, parameters={parameters}"
+            f"g_user_id={g_user_id}, g_book_id={g_book_id}, g_params={g_params}"
         )

@@ -110,7 +110,7 @@ def get_participants(app_id: int, limit: int = 50) -> List[Dict[str, Any]]:
 
     try:
         # Search for accounts that have opted in to the application
-        response = indexer_client.search_accounts(application_id=app_id, limit=limit)
+        response = indexer_client.accounts(application_id=app_id, limit=limit)
 
         # Process accounts
         participants = []
@@ -437,7 +437,7 @@ def export_transaction_state_changes_to_csv(
 
     # Get local state keys from participants
     try:
-        response = indexer_client.search_accounts(application_id=app_id, limit=1)
+        response = indexer_client.accounts(application_id=app_id, limit=1)
         local_state_keys = []
 
         for account in response.get("accounts", []):

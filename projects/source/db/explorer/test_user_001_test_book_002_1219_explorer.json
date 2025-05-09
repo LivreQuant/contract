@@ -1,36 +1,36 @@
 {
   "user_id": "test_user_001",
   "book_id": "test_book_002",
-  "app_id": 1249,
-  "creation_timestamp": 1746819451.7431574,
-  "exploration_timestamp": 1746819470.8222752,
+  "app_id": 1219,
+  "creation_timestamp": 1746818511.8517818,
+  "exploration_timestamp": 1746818534.9505656,
   "blockchain_status": "Deleted",
   "contract_info": {
-    "app_id": 1249,
-    "app_address": "RKTOLG3PPVAIESVR2SRPHQNPF54PWGQRGXTOXU5V5JHDVSAOA7EGGJCWJE",
+    "app_id": 1219,
+    "app_address": "SDBWMLQX2CVH6OXWW4EM5B2QEBHVNALSTCPCGB5REQ4JP7SR5I5QXH64TI",
     "user_id": "test_user_001",
     "user_address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
     "book_id": "test_book_002",
     "parameters": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
-    "creation_timestamp": 1746819451.7431574,
+    "creation_timestamp": 1746818511.8517818,
     "status": "ACTIVE",
     "blockchain_status": "Deleted",
-    "deletion_timestamp": 1746819479.2379434
+    "deletion_timestamp": 1746818545.2837765
   },
   "global_state": {
     "address": "Address: RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
-    "params": "String: region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
-    "status": "String: ACTIVE",
     "book_id": "String: test_book_002",
-    "user_id": "String: test_user_001"
+    "user_id": "String: test_user_001",
+    "params": "String: region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
+    "status": "String: ACTIVE"
   },
   "transaction_history": [
     {
-      "id": "TN2WKFITYGKJ5TSRPLLNQWYK6YHAU3RL7KD7B6F2NNFHL46EM4JA",
+      "id": "XRXADDFJMLCOHTBYOJ4F3BS5VAE6KMWZOZIONY5QMC7PPE6BVS4A",
       "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
-      "timestamp": 1746679155,
-      "date": "2025-05-08 04:39:15",
-      "round": 249,
+      "timestamp": 1746678405,
+      "date": "2025-05-08 04:26:45",
+      "round": 219,
       "app_args": [],
       "on_completion": "noop",
       "global_delta": {},
@@ -57,41 +57,31 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 249,
-        "created-application-index": 1249,
+        "confirmed-round": 219,
+        "created-application-index": 1219,
         "fee": 1000,
-        "first-valid": 248,
+        "first-valid": 218,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
-        "id": "TN2WKFITYGKJ5TSRPLLNQWYK6YHAU3RL7KD7B6F2NNFHL46EM4JA",
+        "id": "XRXADDFJMLCOHTBYOJ4F3BS5VAE6KMWZOZIONY5QMC7PPE6BVS4A",
         "intra-round-offset": 0,
-        "last-valid": 1248,
+        "last-valid": 1218,
         "receiver-rewards": 0,
-        "round-time": 1746679155,
+        "round-time": 1746678405,
         "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
         "sender-rewards": 0,
         "signature": {
-          "sig": "XCjRHgQLsn9nQX6py1wp9TjcJVLwra3WhXPq1RCNrzEh8CymuLebXaf4SbJ2DfstYuTCQLuXGSWVBamxFUAVBw=="
+          "sig": "tAX4rv+nyStZsZsavZMQWrUeCc9z5gezirWjvEdAxug8MmrvuTV1M1iBla3WmRohJCrobmyWGSKPkhoHaJAEBw=="
         },
         "tx-type": "appl"
-      },
-      "tracked_state": {
-        "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
-        },
-        "local_state": {}
       }
     },
     {
-      "id": "CAXWKVXKTRYT65CEUALA67UOUJNE4IEKRWT4EKYK7QDBAHTWEUTA",
+      "id": "PXBLBA6KOYYIQYYVI7XR7U6MZLONDIOOZPMOGYENXNZ2ADQKFIWA",
       "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
-      "timestamp": 1746679205,
-      "date": "2025-05-08 04:40:05",
-      "round": 251,
+      "timestamp": 1746678455,
+      "date": "2025-05-08 04:27:35",
+      "round": 221,
       "app_args": [
         "2325f9af...",
         "\u0000\rtest_user_001",
@@ -117,7 +107,7 @@
             "AA10ZXN0X2Jvb2tfMDAy",
             "ADZyZWdpb246TkF8YXNzZXRfY2xhc3M6RVFVSVRJRVN8aW5zdHJ1bWVudF9jbGFzczpTVE9DS1M="
           ],
-          "application-id": 1249,
+          "application-id": 1219,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -132,9 +122,9 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 251,
+        "confirmed-round": 221,
         "fee": 1000,
-        "first-valid": 250,
+        "first-valid": 220,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
         "global-state-delta": [
@@ -179,38 +169,28 @@
             }
           }
         ],
-        "id": "CAXWKVXKTRYT65CEUALA67UOUJNE4IEKRWT4EKYK7QDBAHTWEUTA",
+        "id": "PXBLBA6KOYYIQYYVI7XR7U6MZLONDIOOZPMOGYENXNZ2ADQKFIWA",
         "intra-round-offset": 0,
-        "last-valid": 1250,
+        "last-valid": 1220,
         "logs": [
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679205,
+        "round-time": 1746678455,
         "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
         "sender-rewards": 0,
         "signature": {
-          "sig": "9bHm8TVftIKDLsXlrwwvPLFE/uXlq47Gvn4+TxWsoo/GgqNP2jVT9vvP/mHoFDXL/C3HDlgkl8ZlcdYamBZPBw=="
+          "sig": "BgLcHYukshpFDI2qZ0a8VbIUAbdMvX792wb7oaWtRZzsrK4GDeQMZwWIHxYAQ0Boo4IitDCbo0IgoJzU2BvmCw=="
         },
         "tx-type": "appl"
-      },
-      "tracked_state": {
-        "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
-        },
-        "local_state": {}
       }
     },
     {
-      "id": "OW65SUDCO5STP6L23TGOCHZ4N4E5RUDDSWU6U7W57FEKU34Z23AA",
+      "id": "2NPB3UKSX32PLKEFDVJVNUAZVRCJTWOXYEQEBWQSLGJUOQWMZINA",
       "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
-      "timestamp": 1746679230,
-      "date": "2025-05-08 04:40:30",
-      "round": 252,
+      "timestamp": 1746678480,
+      "date": "2025-05-08 04:28:00",
+      "round": 222,
       "app_args": [
         "8af67f50...",
         "\u0000\rtest_user_001",
@@ -239,7 +219,7 @@
             "AAAAAAAAAAE=",
             "ADZyZWdpb246TkF8YXNzZXRfY2xhc3M6RVFVSVRJRVN8aW5zdHJ1bWVudF9jbGFzczpTVE9DS1M="
           ],
-          "application-id": 1249,
+          "application-id": 1219,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -254,9 +234,9 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 252,
+        "confirmed-round": 222,
         "fee": 1000,
-        "first-valid": 251,
+        "first-valid": 221,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
         "global-state-delta": [
@@ -277,38 +257,28 @@
             }
           }
         ],
-        "id": "OW65SUDCO5STP6L23TGOCHZ4N4E5RUDDSWU6U7W57FEKU34Z23AA",
+        "id": "2NPB3UKSX32PLKEFDVJVNUAZVRCJTWOXYEQEBWQSLGJUOQWMZINA",
         "intra-round-offset": 0,
-        "last-valid": 1251,
+        "last-valid": 1221,
         "logs": [
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679230,
+        "round-time": 1746678480,
         "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
         "sender-rewards": 0,
         "signature": {
-          "sig": "T4dfbKyyx2G53kmUpU+C9ckkauCkpd+VHby7QbGJzfH1Z75zG2drqeR5GYsqBG2uO1vU7txIvnELKAKlU/W7CQ=="
+          "sig": "WxJpzUF2lx1FK5jcwUuMIzPhnmzg32R37e1dlztLyZEgnRNnHA9gMfN+d8ausr/IR8SIa4lgM1Avq9Sgzx2VDA=="
         },
         "tx-type": "appl"
-      },
-      "tracked_state": {
-        "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
-        },
-        "local_state": {}
       }
     },
     {
-      "id": "R35TZI7NG63HZJOR225GETG57FHE2MLPQ4NVF7CUQMVHTOJ5KRBA",
+      "id": "5YACRB7GFUYHC3EDRUBGD35TIITWG7IZLWFKWQIS74O7BSR6LWHQ",
       "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
-      "timestamp": 1746679255,
-      "date": "2025-05-08 04:40:55",
-      "round": 253,
+      "timestamp": 1746678505,
+      "date": "2025-05-08 04:28:25",
+      "round": 223,
       "app_args": [
         "8789bcdb..."
       ],
@@ -328,7 +298,7 @@
           "application-args": [
             "h4m82w=="
           ],
-          "application-id": 1249,
+          "application-id": 1219,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -343,14 +313,14 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 253,
+        "confirmed-round": 223,
         "fee": 1000,
-        "first-valid": 252,
+        "first-valid": 222,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
-        "id": "R35TZI7NG63HZJOR225GETG57FHE2MLPQ4NVF7CUQMVHTOJ5KRBA",
+        "id": "5YACRB7GFUYHC3EDRUBGD35TIITWG7IZLWFKWQIS74O7BSR6LWHQ",
         "intra-round-offset": 0,
-        "last-valid": 1252,
+        "last-valid": 1222,
         "local-state-delta": [
           {
             "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
@@ -386,35 +356,21 @@
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679255,
+        "round-time": 1746678505,
         "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
         "sender-rewards": 0,
         "signature": {
-          "sig": "/mL/Ubpzd7nNYLLRDU9bYnKXFZeFdBHQxywyGsW/9YIePL2UC0+VCjmzKTh6CcQtVpje97e1iCLsQMXXh2bQBA=="
+          "sig": "X71D20ageooErxx8+8jP3mqjNOudB5LNwxufDyPh+1x9bdvuk2jlUpbdjRF6itxX2m3sWj6TCH6qCRQnRcQHDw=="
         },
         "tx-type": "appl"
-      },
-      "tracked_state": {
-        "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
-        },
-        "local_state": {
-          "book_hash": "",
-          "research_hash": "",
-          "params": ""
-        }
       }
     },
     {
-      "id": "GGB4NFSQQVE3AK3PFYH6RT5KHZBW4KGKCMHRHQFAZK5LPYILVI2Q",
+      "id": "SJWFY3FINLLCIK5WJRKMJ2IV4OGW4FRZBPPL32UCCIRTX2KIID5A",
       "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
-      "timestamp": 1746679280,
-      "date": "2025-05-08 04:41:20",
-      "round": 254,
+      "timestamp": 1746678530,
+      "date": "2025-05-08 04:28:50",
+      "round": 224,
       "app_args": [
         "a1d81bd3...",
         "\u0000%book_hash_test_user_001_test_book_002",
@@ -440,7 +396,7 @@
             "AClyZXNlYXJjaF9oYXNoX3Rlc3RfdXNlcl8wMDFfdGVzdF9ib29rXzAwMg==",
             "AEFwYXJhbTE6dmFsdWUxfHBhcmFtMjp2YWx1ZTJ8dXNlcjp0ZXN0X3VzZXJfMDAxfGJvb2s6dGVzdF9ib29rXzAwMg=="
           ],
-          "application-id": 1249,
+          "application-id": 1219,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -455,14 +411,14 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 254,
+        "confirmed-round": 224,
         "fee": 1000,
-        "first-valid": 253,
+        "first-valid": 223,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
-        "id": "GGB4NFSQQVE3AK3PFYH6RT5KHZBW4KGKCMHRHQFAZK5LPYILVI2Q",
+        "id": "SJWFY3FINLLCIK5WJRKMJ2IV4OGW4FRZBPPL32UCCIRTX2KIID5A",
         "intra-round-offset": 0,
-        "last-valid": 1253,
+        "last-valid": 1223,
         "local-state-delta": [
           {
             "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
@@ -498,40 +454,26 @@
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679280,
+        "round-time": 1746678530,
         "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
         "sender-rewards": 0,
         "signature": {
-          "sig": "VXL0c9a5SB6irPgFXbXDLzWB400Jgoy+nzgBleTUi4UJgr17tIe24sO4Grpa4KVmI6RvdThitjL1fk9tjGElAg=="
+          "sig": "i7Cp9QRTnAZcZkHKfCYdnl8nsjzlujdtjYu0Kjs2ARCuMbugalJmjgvtoZHH53QNlVePfd1vewMaGEGdSi0rBQ=="
         },
         "tx-type": "appl"
-      },
-      "tracked_state": {
-        "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
-        },
-        "local_state": {
-          "book_hash": "",
-          "research_hash": "",
-          "params": ""
-        }
       }
     },
     {
-      "id": "UORJZ5P6GSIX2J3XAJLDRYLN5U3SB6RYMU625KIYLRCCGUH7S5OQ",
+      "id": "QEHBLLA2FT3JSBSCCMMBV7JW3QHY5DALHXJJWLB6BUSK57YL7QNA",
       "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
-      "timestamp": 1746679305,
-      "date": "2025-05-08 04:41:45",
-      "round": 255,
+      "timestamp": 1746678555,
+      "date": "2025-05-08 04:29:15",
+      "round": 225,
       "app_args": [
         "a1d81bd3...",
         "\u0000-book_hash_test_user_001_test_book_002_updated",
         "\u00001research_hash_test_user_001_test_book_002_updated",
-        "\u0000fparam1:new_value1|param2:new_value2|user:test_user_001|book:test_book_002|timestamp:1746819454.0200799"
+        "\u0000fparam1:new_value1|param2:new_value2|user:test_user_001|book:test_book_002|timestamp:1746818515.4995248"
       ],
       "on_completion": "noop",
       "global_delta": {},
@@ -550,9 +492,9 @@
             "odgb0w==",
             "AC1ib29rX2hhc2hfdGVzdF91c2VyXzAwMV90ZXN0X2Jvb2tfMDAyX3VwZGF0ZWQ=",
             "ADFyZXNlYXJjaF9oYXNoX3Rlc3RfdXNlcl8wMDFfdGVzdF9ib29rXzAwMl91cGRhdGVk",
-            "AGZwYXJhbTE6bmV3X3ZhbHVlMXxwYXJhbTI6bmV3X3ZhbHVlMnx1c2VyOnRlc3RfdXNlcl8wMDF8Ym9vazp0ZXN0X2Jvb2tfMDAyfHRpbWVzdGFtcDoxNzQ2ODE5NDU0LjAyMDA3OTk="
+            "AGZwYXJhbTE6bmV3X3ZhbHVlMXxwYXJhbTI6bmV3X3ZhbHVlMnx1c2VyOnRlc3RfdXNlcl8wMDF8Ym9vazp0ZXN0X2Jvb2tfMDAyfHRpbWVzdGFtcDoxNzQ2ODE4NTE1LjQ5OTUyNDg="
           ],
-          "application-id": 1249,
+          "application-id": 1219,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -567,14 +509,14 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 255,
+        "confirmed-round": 225,
         "fee": 1000,
-        "first-valid": 254,
+        "first-valid": 224,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
-        "id": "UORJZ5P6GSIX2J3XAJLDRYLN5U3SB6RYMU625KIYLRCCGUH7S5OQ",
+        "id": "QEHBLLA2FT3JSBSCCMMBV7JW3QHY5DALHXJJWLB6BUSK57YL7QNA",
         "intra-round-offset": 0,
-        "last-valid": 1254,
+        "last-valid": 1224,
         "local-state-delta": [
           {
             "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
@@ -591,7 +533,7 @@
                 "key": "cGFyYW1z",
                 "value": {
                   "action": 1,
-                  "bytes": "cGFyYW0xOm5ld192YWx1ZTF8cGFyYW0yOm5ld192YWx1ZTJ8dXNlcjp0ZXN0X3VzZXJfMDAxfGJvb2s6dGVzdF9ib29rXzAwMnx0aW1lc3RhbXA6MTc0NjgxOTQ1NC4wMjAwNzk5",
+                  "bytes": "cGFyYW0xOm5ld192YWx1ZTF8cGFyYW0yOm5ld192YWx1ZTJ8dXNlcjp0ZXN0X3VzZXJfMDAxfGJvb2s6dGVzdF9ib29rXzAwMnx0aW1lc3RhbXA6MTc0NjgxODUxNS40OTk1MjQ4",
                   "uint": 0
                 }
               },
@@ -610,35 +552,21 @@
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679305,
+        "round-time": 1746678555,
         "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
         "sender-rewards": 0,
         "signature": {
-          "sig": "pvg06pMB/TZYy3QvNkeRkAXvd2L3TmM7xRXByH27vaWXiQzlgIeKhSIBGuBYjweWRPBWxg5QhqmFxvO5ua6gDA=="
+          "sig": "EH3vdSjLkhfZ6x/HZH8QppNUI9BOpDqGAFXciQWLbcg0uRZ6WYF/y8ETmiJjhKnTefzku+EoWwrv6VdOPW2fAw=="
         },
         "tx-type": "appl"
-      },
-      "tracked_state": {
-        "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
-        },
-        "local_state": {
-          "book_hash": "",
-          "research_hash": "",
-          "params": ""
-        }
       }
     },
     {
-      "id": "57X5SB7RFWOVDJNPQJVCQVJLZJLIOKEAKFOOQKLRDHOPPOG2IR6A",
+      "id": "7EDE27JWGH7B2RK54KGR3HI2GADIPQ4R32DC7LJBUB7EIPSM6XHA",
       "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
-      "timestamp": 1746679330,
-      "date": "2025-05-08 04:42:10",
-      "round": 256,
+      "timestamp": 1746678580,
+      "date": "2025-05-08 04:29:40",
+      "round": 226,
       "app_args": [
         "abe79c1f..."
       ],
@@ -658,7 +586,7 @@
           "application-args": [
             "q+ecHw=="
           ],
-          "application-id": 1249,
+          "application-id": 1219,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -673,14 +601,14 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 256,
+        "confirmed-round": 226,
         "fee": 1000,
-        "first-valid": 255,
+        "first-valid": 225,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
-        "id": "57X5SB7RFWOVDJNPQJVCQVJLZJLIOKEAKFOOQKLRDHOPPOG2IR6A",
+        "id": "7EDE27JWGH7B2RK54KGR3HI2GADIPQ4R32DC7LJBUB7EIPSM6XHA",
         "intra-round-offset": 0,
-        "last-valid": 1255,
+        "last-valid": 1225,
         "local-state-delta": [
           {
             "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
@@ -716,23 +644,13 @@
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679330,
+        "round-time": 1746678580,
         "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
         "sender-rewards": 0,
         "signature": {
-          "sig": "SFYcJRGPk/5Cr7YvK7AN0i7bhPbFgUPdtrQ+VenlK+M3J91pzW6xcmHgrTogi+nMJRlXmQ5QkwL/h8t+I718AA=="
+          "sig": "U9wwJGFqoRKG0sNM5STfQiOcQnsbaAJQbADW5TwL9Y+1QGrl8HRc6av9e13cAwjPVso1uEdFu5wEN5Oo7leEBA=="
         },
         "tx-type": "appl"
-      },
-      "tracked_state": {
-        "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
-        },
-        "local_state": {}
       }
     }
   ],
@@ -741,31 +659,15 @@
       "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
       "opted_in": false,
       "local_state": null,
-      "amount": 1044000
+      "amount": 1056000
     }
   ],
-  "csv_export_path": "/home/samaral/projects/algo/20250508/contract/projects/source/db/explorer/test_user_001_test_book_002_1249_transactions.csv",
+  "csv_export_path": "/home/samaral/projects/algo/20250508/contract/projects/source/db/explorer/test_user_001_test_book_002_1219_transactions.csv",
   "raw_global_state": [
     {
       "key": "YWRkcmVzcw==",
       "value": {
         "bytes": "igykfZv38HzDLVP7nb0g/Sk26leGzvj+JPGCrOkAqT0=",
-        "type": 1,
-        "uint": 0
-      }
-    },
-    {
-      "key": "cGFyYW1z",
-      "value": {
-        "bytes": "cmVnaW9uOk5BfGFzc2V0X2NsYXNzOkVRVUlUSUVTfGluc3RydW1lbnRfY2xhc3M6U1RPQ0tT",
-        "type": 1,
-        "uint": 0
-      }
-    },
-    {
-      "key": "c3RhdHVz",
-      "value": {
-        "bytes": "QUNUSVZF",
         "type": 1,
         "uint": 0
       }
@@ -785,7 +687,23 @@
         "type": 1,
         "uint": 0
       }
+    },
+    {
+      "key": "cGFyYW1z",
+      "value": {
+        "bytes": "cmVnaW9uOk5BfGFzc2V0X2NsYXNzOkVRVUlUSUVTfGluc3RydW1lbnRfY2xhc3M6U1RPQ0tT",
+        "type": 1,
+        "uint": 0
+      }
+    },
+    {
+      "key": "c3RhdHVz",
+      "value": {
+        "bytes": "QUNUSVZF",
+        "type": 1,
+        "uint": 0
+      }
     }
   ],
-  "deletion_timestamp": 1746819479.239275
+  "deletion_timestamp": 1746818545.2853549
 }

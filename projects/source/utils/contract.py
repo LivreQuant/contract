@@ -57,9 +57,27 @@ def deploy_contract(
     # Initialize Algorand client
     algod_client = get_algod_client()
 
-    # Get account information
-    admin_private_key, admin_address = get_account_from_mnemonic(ADMIN_MNEMONIC)
-    user_private_key, user_address = get_account_from_mnemonic(USER_MNEMONIC)
+    # Get account information using encrypted credentials
+    from utils.wallet import get_admin_credentials, get_wallet_credentials
+
+    try:
+        # For admin wallet
+        admin_private_key, admin_address = get_admin_credentials()
+
+        # For user wallet
+        wallets_dir = Path("wallets")
+        user_wallets = list(wallets_dir.glob("user_*_wallet.json"))
+        if not user_wallets:
+            raise FileNotFoundError("No user wallet files found")
+
+        # Use the first user wallet found
+        with open(user_wallets[0], "r") as f:
+            user_wallet = json.load(f)
+
+        user_private_key, user_address = get_wallet_credentials(user_wallet)
+    except Exception as e:
+        logger.error(f"Error getting wallet credentials: {e}")
+        raise
 
     logger.info(f"Admin address: {admin_address}")
     logger.info(f"User address: {user_address}")

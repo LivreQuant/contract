@@ -214,15 +214,16 @@ def deploy_trader_contract():
     wait_for_confirmation(algod_client, fund_txid)
     logger.info(f"Funded contract with 1 Algo")
 
-    # Define the real user values for initialize
+    # Define the real user values for initialize (COMES FROM PROFILE + PORTFOLIO FORMS)
     user_id = "user123"
     book_id = "book456"
     params_str = "region:NA|asset_class:EQUITIES|instrument_class:STOCKS"
 
-    # Convert strings to bytes
-    user_id_bytes = user_id.encode()
-    book_id_bytes = book_id.encode()
-    params_bytes = params_str.encode()
+    # Convert strings to bytes with ABI encoding
+    # Add a 2-byte length prefix to each string
+    user_id_bytes = len(user_id).to_bytes(2, byteorder="big") + user_id.encode()
+    book_id_bytes = len(book_id).to_bytes(2, byteorder="big") + book_id.encode()
+    params_bytes = len(params_str).to_bytes(2, byteorder="big") + params_str.encode()
 
     # Create application call transaction to initialize contract
     # Note: initialize only accepts 3 parameters, not the user address

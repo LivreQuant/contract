@@ -1,0 +1,10 @@
+{
+  "app_id": 1085,
+  "app_address": "2MLRYF3DBSFDDNBOGFRREKCNP7RSRBLLQ3IBP3NLISJW5G65UXQXEETOW4",
+  "user_address": "JW22UTJTK57X62XUBK55Q6QQ7U5HPSINE3NAPNZZV2Q2ZCVIIAFB45DXTE",
+  "admin_address": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
+  "user_id": "user123",
+  "book_id": "book456",
+  "parameters": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
+  "creation_timestamp": 1746759437.5211315
+}

@@ -1,0 +1,12 @@
+{
+  "app_id": 1338,
+  "app_address": "7HBGIYO6FTDCLF73BT6IHCLE3KXCVBJBNPH6FYFUQOTYV4TI7M6UWJXBRE",
+  "user_id": "test_user_001",
+  "user_address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
+  "book_id": "test_book_002",
+  "parameters": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
+  "creation_timestamp": 1746823494.6647356,
+  "status": "ACTIVE",
+  "blockchain_status": "Deleted",
+  "deletion_timestamp": 1746823539.9776962
+}

@@ -1,34 +1,36 @@
 {
   "user_id": "test_user_001",
   "book_id": "test_book_002",
-  "app_id": 1269,
-  "creation_timestamp": 1746821227.7061427,
-  "exploration_timestamp": 1746821255.311261,
-  "blockchain_status": "Active",
+  "app_id": 1328,
+  "creation_timestamp": 1746823325.6007318,
+  "exploration_timestamp": 1746823345.8187234,
+  "blockchain_status": "Deleted",
   "contract_info": {
-    "app_id": 1269,
-    "app_address": "V3N2LI45DKJBYF2LN2IFDKPMLS4BYVH3NDKOSSKTEG6PS6PMAPHLTQ3LQU",
+    "app_id": 1328,
+    "app_address": "QR7A5ROTPRLWVUJT3UOXZG732QHI3N2UINYMC3SWHM4WOONFQX7SJZNI2E",
     "user_id": "test_user_001",
     "user_address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
     "book_id": "test_book_002",
     "parameters": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
-    "creation_timestamp": 1746821227.7061427,
-    "status": "ACTIVE"
+    "creation_timestamp": 1746823325.6007318,
+    "status": "ACTIVE",
+    "blockchain_status": "Deleted",
+    "deletion_timestamp": 1746823364.502946
   },
   "global_state": {
-    "address": "Address: RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
-    "book_id": "String: test_book_002",
     "params": "String: region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
     "status": "String: ACTIVE",
+    "address": "Address: RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
+    "book_id": "String: test_book_002",
     "user_id": "String: test_user_001"
   },
   "transaction_history": [
     {
-      "id": "Y6LVG4F5DYHBS6QJJJASX5VYPQAPOJV6Y4GD6EAPX4CZCEK55J4Q",
+      "id": "WS7TBBTISRJVK53MZUK2YXSG57GAS27MPJTPKMNULQWRCZUT42EQ",
       "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
-      "timestamp": 1746679655,
-      "date": "2025-05-08 04:47:35",
-      "round": 269,
+      "timestamp": 1746681130,
+      "date": "2025-05-08 05:12:10",
+      "round": 328,
       "app_args": [],
       "on_completion": "noop",
       "global_delta": {},
@@ -55,21 +57,21 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 269,
-        "created-application-index": 1269,
+        "confirmed-round": 328,
+        "created-application-index": 1328,
         "fee": 1000,
-        "first-valid": 268,
+        "first-valid": 327,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
-        "id": "Y6LVG4F5DYHBS6QJJJASX5VYPQAPOJV6Y4GD6EAPX4CZCEK55J4Q",
+        "id": "WS7TBBTISRJVK53MZUK2YXSG57GAS27MPJTPKMNULQWRCZUT42EQ",
         "intra-round-offset": 0,
-        "last-valid": 1268,
+        "last-valid": 1327,
         "receiver-rewards": 0,
-        "round-time": 1746679655,
+        "round-time": 1746681130,
         "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
         "sender-rewards": 0,
         "signature": {
-          "sig": "K+A7IWaRgCWvcInYqn4f4/Tco+lRyMVCelwUI/8g7tW6zKvXnnUa5OTj9AbSRuuIp5PanfJ7TlZ1E8cjBMDIBw=="
+          "sig": "NwNEl/eZbrXr6cxZxvYD5N4IAtbYNHU6YdSbn1wkxasXDODYDRno8iWMDUzdmczYOrBtg+ELVoz8CaxVfXGpCg=="
         },
         "tx-type": "appl"
       },
@@ -85,11 +87,11 @@
       }
     },
     {
-      "id": "CM2LEGJNFBH2ASSPAIP36RXGSXBQ3NEEJPQ4R5O4K6UQSRIGXXAA",
+      "id": "H23OCRU5U3MTHUWI4TMEMFANDCFX565TUG6M7GWNTIHGP6DABKVQ",
       "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
-      "timestamp": 1746679705,
-      "date": "2025-05-08 04:48:25",
-      "round": 271,
+      "timestamp": 1746681180,
+      "date": "2025-05-08 05:13:00",
+      "round": 330,
       "app_args": [
         "2325f9af...",
         "\u0000\rtest_user_001",
@@ -115,7 +117,7 @@
             "AA10ZXN0X2Jvb2tfMDAy",
             "ADZyZWdpb246TkF8YXNzZXRfY2xhc3M6RVFVSVRJRVN8aW5zdHJ1bWVudF9jbGFzczpTVE9DS1M="
           ],
-          "application-id": 1269,
+          "application-id": 1328,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -130,9 +132,9 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 271,
+        "confirmed-round": 330,
         "fee": 1000,
-        "first-valid": 270,
+        "first-valid": 329,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
         "global-state-delta": [
@@ -177,38 +179,38 @@
             }
           }
         ],
-        "id": "CM2LEGJNFBH2ASSPAIP36RXGSXBQ3NEEJPQ4R5O4K6UQSRIGXXAA",
+        "id": "H23OCRU5U3MTHUWI4TMEMFANDCFX565TUG6M7GWNTIHGP6DABKVQ",
         "intra-round-offset": 0,
-        "last-valid": 1270,
+        "last-valid": 1329,
         "logs": [
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679705,
+        "round-time": 1746681180,
         "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
         "sender-rewards": 0,
         "signature": {
-          "sig": "7pVjuPJDUpHsKxB5d5wMQgsyDQj8WlJdgzboq9OTlZvbkwZoxEGanVryyZ/jaSd5UF38g7I7lfic74KF4zWPAg=="
+          "sig": "WmUcNENNmaZT69HXlrIkrEoGdDuRecHhlbJRuFYf40agCyhRrzvWPorm+F98MSG5kYEAjhFYYjKwHrNxbdqhBw=="
         },
         "tx-type": "appl"
       },
       "tracked_state": {
         "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
+          "user_id": "test_user_001",
+          "book_id": "test_book_002",
+          "address": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+          "status": "INACTIVE-INIT",
+          "params": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS"
         },
         "local_state": {}
       }
     },
     {
-      "id": "YMURNIIWOHL4GGZXLHHH75NKN4IGDVEC2Z5YFMESCBW53YROJ43Q",
+      "id": "SDB47UQ5J2WGNF22MHSRT3BNDD6RFQAED4RLAXE7P7LI6KB7RADQ",
       "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
-      "timestamp": 1746679730,
-      "date": "2025-05-08 04:48:50",
-      "round": 272,
+      "timestamp": 1746681205,
+      "date": "2025-05-08 05:13:25",
+      "round": 331,
       "app_args": [
         "8af67f50...",
         "\u0000\rtest_user_001",
@@ -237,7 +239,7 @@
             "AAAAAAAAAAE=",
             "ADZyZWdpb246TkF8YXNzZXRfY2xhc3M6RVFVSVRJRVN8aW5zdHJ1bWVudF9jbGFzczpTVE9DS1M="
           ],
-          "application-id": 1269,
+          "application-id": 1328,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -252,9 +254,9 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 272,
+        "confirmed-round": 331,
         "fee": 1000,
-        "first-valid": 271,
+        "first-valid": 330,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
         "global-state-delta": [
@@ -275,38 +277,38 @@
             }
           }
         ],
-        "id": "YMURNIIWOHL4GGZXLHHH75NKN4IGDVEC2Z5YFMESCBW53YROJ43Q",
+        "id": "SDB47UQ5J2WGNF22MHSRT3BNDD6RFQAED4RLAXE7P7LI6KB7RADQ",
         "intra-round-offset": 0,
-        "last-valid": 1271,
+        "last-valid": 1330,
         "logs": [
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679730,
+        "round-time": 1746681205,
         "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
         "sender-rewards": 0,
         "signature": {
-          "sig": "yvBAPzVbp6zokc1w5aNKAvMlHR/sqzULWhiE2/gJcw+fymPtxkE2XLf1VgudWgBiIx3q38AtJFDg+dSV4VmXAA=="
+          "sig": "eC8SWBwtq28vpFwqhpZBseh40DP9+/UKnAw48mrvlvbj8Mj3wus5bYFgnoqJuQkOVTD1Dq4fkz+UNMAI7fsPBA=="
         },
         "tx-type": "appl"
       },
       "tracked_state": {
         "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
+          "user_id": "test_user_001",
+          "book_id": "test_book_002",
+          "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
+          "status": "ACTIVE",
+          "params": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS"
         },
         "local_state": {}
       }
     },
     {
-      "id": "TXQDCXJ6A4O4JZPUH2SYWPA5246WAGRTTW2SYYFGFBRZH4QLHVXA",
+      "id": "YYEEM6CIYKMPZCWQVXGK737LPNWWZG5AZFDN35DX2B4RK4VZTLJQ",
       "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
-      "timestamp": 1746679755,
-      "date": "2025-05-08 04:49:15",
-      "round": 273,
+      "timestamp": 1746681230,
+      "date": "2025-05-08 05:13:50",
+      "round": 332,
       "app_args": [
         "8789bcdb..."
       ],
@@ -326,7 +328,7 @@
           "application-args": [
             "h4m82w=="
           ],
-          "application-id": 1269,
+          "application-id": 1328,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -341,14 +343,14 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 273,
+        "confirmed-round": 332,
         "fee": 1000,
-        "first-valid": 272,
+        "first-valid": 331,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
-        "id": "TXQDCXJ6A4O4JZPUH2SYWPA5246WAGRTTW2SYYFGFBRZH4QLHVXA",
+        "id": "YYEEM6CIYKMPZCWQVXGK737LPNWWZG5AZFDN35DX2B4RK4VZTLJQ",
         "intra-round-offset": 0,
-        "last-valid": 1272,
+        "last-valid": 1331,
         "local-state-delta": [
           {
             "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
@@ -384,35 +386,35 @@
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679755,
+        "round-time": 1746681230,
         "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
         "sender-rewards": 0,
         "signature": {
-          "sig": "TTJpVd67T6gAFCsq8E/qegT5AjJisGjm/3IqrKbrnDrCiklQRv6o6hgPexrCb6GnvBNlTeGawY1UJGq/88LHDA=="
+          "sig": "MlP65jSYJGAEdVk9TQkt9I8bLHMmwln2bv0+xq2agrincyX54XVt/FGgeadJZ2Bv/VsO+gcdEvdszvxmMG6dDg=="
         },
         "tx-type": "appl"
       },
       "tracked_state": {
         "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
+          "user_id": "test_user_001",
+          "book_id": "test_book_002",
+          "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
+          "status": "ACTIVE",
+          "params": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS"
         },
         "local_state": {
-          "book_hash": "",
-          "research_hash": "",
-          "params": ""
+          "book_hash": "NAN",
+          "research_hash": "NAN",
+          "params": "NAN"
         }
       }
     },
     {
-      "id": "MYBZJ3LRAN3LSP42XYLK322IYC22IFLUCYJGITURGBAESKRYYMTQ",
+      "id": "FQF2I2FJMAWUGEGRTVQPOTYF2EJAUQ5IMHNM3LCLLNIGLBW7ZZ5Q",
       "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
-      "timestamp": 1746679780,
-      "date": "2025-05-08 04:49:40",
-      "round": 274,
+      "timestamp": 1746681255,
+      "date": "2025-05-08 05:14:15",
+      "round": 333,
       "app_args": [
         "a1d81bd3...",
         "\u0000%book_hash_test_user_001_test_book_002",
@@ -438,7 +440,7 @@
             "AClyZXNlYXJjaF9oYXNoX3Rlc3RfdXNlcl8wMDFfdGVzdF9ib29rXzAwMg==",
             "AEFwYXJhbTE6dmFsdWUxfHBhcmFtMjp2YWx1ZTJ8dXNlcjp0ZXN0X3VzZXJfMDAxfGJvb2s6dGVzdF9ib29rXzAwMg=="
           ],
-          "application-id": 1269,
+          "application-id": 1328,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -453,14 +455,14 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 274,
+        "confirmed-round": 333,
         "fee": 1000,
-        "first-valid": 273,
+        "first-valid": 332,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
-        "id": "MYBZJ3LRAN3LSP42XYLK322IYC22IFLUCYJGITURGBAESKRYYMTQ",
+        "id": "FQF2I2FJMAWUGEGRTVQPOTYF2EJAUQ5IMHNM3LCLLNIGLBW7ZZ5Q",
         "intra-round-offset": 0,
-        "last-valid": 1273,
+        "last-valid": 1332,
         "local-state-delta": [
           {
             "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
@@ -496,40 +498,40 @@
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679780,
+        "round-time": 1746681255,
         "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
         "sender-rewards": 0,
         "signature": {
-          "sig": "iJMmb/ALz4Qp0h2WoS8Hu+v600yROiR+NlplQayuFKkL762gaDpOnUFv0jNqGbmcV47/kml96EGC1nNhfvG5Dw=="
+          "sig": "EK8w4sx/JRM7pjmfptaKhFG9Svlhbrq0cg8CEM/6xrnrvj4fGj52u7H3pLIjynrZJmG0dXkjpxsmqvxblTkWAA=="
         },
         "tx-type": "appl"
       },
       "tracked_state": {
         "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
+          "user_id": "test_user_001",
+          "book_id": "test_book_002",
+          "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
+          "status": "ACTIVE",
+          "params": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS"
         },
         "local_state": {
-          "book_hash": "",
-          "research_hash": "",
-          "params": ""
+          "book_hash": "book_hash_test_user_001_test_book_002",
+          "research_hash": "research_hash_test_user_001_test_book_002",
+          "params": "param1:value1|param2:value2|user:test_user_001|book:test_book_002"
         }
       }
     },
     {
-      "id": "6NWM2MIIKJFYPQVL5CIULAMCDD6WZMZ4J74SEO3QP7GJ7MJ5DKSA",
+      "id": "HYIWKZCHUBONPKXZYV3M7BZ7LXOTCLFAAPZVCU5IKTA6DNXS37OQ",
       "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
-      "timestamp": 1746679805,
-      "date": "2025-05-08 04:50:05",
-      "round": 275,
+      "timestamp": 1746681280,
+      "date": "2025-05-08 05:14:40",
+      "round": 334,
       "app_args": [
         "a1d81bd3...",
         "\u0000-book_hash_test_user_001_test_book_002_updated",
         "\u00001research_hash_test_user_001_test_book_002_updated",
-        "\u0000fparam1:new_value1|param2:new_value2|user:test_user_001|book:test_book_002|timestamp:1746821230.0122135"
+        "\u0000fparam1:new_value1|param2:new_value2|user:test_user_001|book:test_book_002|timestamp:1746823328.2322252"
       ],
       "on_completion": "noop",
       "global_delta": {},
@@ -548,9 +550,9 @@
             "odgb0w==",
             "AC1ib29rX2hhc2hfdGVzdF91c2VyXzAwMV90ZXN0X2Jvb2tfMDAyX3VwZGF0ZWQ=",
             "ADFyZXNlYXJjaF9oYXNoX3Rlc3RfdXNlcl8wMDFfdGVzdF9ib29rXzAwMl91cGRhdGVk",
-            "AGZwYXJhbTE6bmV3X3ZhbHVlMXxwYXJhbTI6bmV3X3ZhbHVlMnx1c2VyOnRlc3RfdXNlcl8wMDF8Ym9vazp0ZXN0X2Jvb2tfMDAyfHRpbWVzdGFtcDoxNzQ2ODIxMjMwLjAxMjIxMzU="
+            "AGZwYXJhbTE6bmV3X3ZhbHVlMXxwYXJhbTI6bmV3X3ZhbHVlMnx1c2VyOnRlc3RfdXNlcl8wMDF8Ym9vazp0ZXN0X2Jvb2tfMDAyfHRpbWVzdGFtcDoxNzQ2ODIzMzI4LjIzMjIyNTI="
           ],
-          "application-id": 1269,
+          "application-id": 1328,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -565,14 +567,14 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 275,
+        "confirmed-round": 334,
         "fee": 1000,
-        "first-valid": 274,
+        "first-valid": 333,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
-        "id": "6NWM2MIIKJFYPQVL5CIULAMCDD6WZMZ4J74SEO3QP7GJ7MJ5DKSA",
+        "id": "HYIWKZCHUBONPKXZYV3M7BZ7LXOTCLFAAPZVCU5IKTA6DNXS37OQ",
         "intra-round-offset": 0,
-        "last-valid": 1274,
+        "last-valid": 1333,
         "local-state-delta": [
           {
             "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
@@ -589,7 +591,7 @@
                 "key": "cGFyYW1z",
                 "value": {
                   "action": 1,
-                  "bytes": "cGFyYW0xOm5ld192YWx1ZTF8cGFyYW0yOm5ld192YWx1ZTJ8dXNlcjp0ZXN0X3VzZXJfMDAxfGJvb2s6dGVzdF9ib29rXzAwMnx0aW1lc3RhbXA6MTc0NjgyMTIzMC4wMTIyMTM1",
+                  "bytes": "cGFyYW0xOm5ld192YWx1ZTF8cGFyYW0yOm5ld192YWx1ZTJ8dXNlcjp0ZXN0X3VzZXJfMDAxfGJvb2s6dGVzdF9ib29rXzAwMnx0aW1lc3RhbXA6MTc0NjgyMzMyOC4yMzIyMjUy",
                   "uint": 0
                 }
               },
@@ -608,35 +610,35 @@
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679805,
+        "round-time": 1746681280,
         "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
         "sender-rewards": 0,
         "signature": {
-          "sig": "lxgY4+xTEeOn4c4YT9TWVbTNHkcf1pUF5C24t/m10JFLhvOUlTjN3vyMXkb4ZzjbEaAPJj9of2g3YpuMOv+2CA=="
+          "sig": "yJ2Qlvh2kcNbKriVg+BMp0QSXJJ2PzaqFcHkLAW1N3fpza6wfVPaAEFv9HWA9sFMUBSbWQRRltF9xAWknMiWCA=="
         },
         "tx-type": "appl"
       },
       "tracked_state": {
         "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
+          "user_id": "test_user_001",
+          "book_id": "test_book_002",
+          "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
+          "status": "ACTIVE",
+          "params": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS"
         },
         "local_state": {
-          "book_hash": "",
-          "research_hash": "",
-          "params": ""
+          "book_hash": "book_hash_test_user_001_test_book_002_updated",
+          "research_hash": "research_hash_test_user_001_test_book_002_updated",
+          "params": "param1:new_value1|param2:new_value2|user:test_user_001|book:test_book_002|timestamp:1746823328.2322252"
         }
       }
     },
     {
-      "id": "P45EBR65I6E5AVGSN7QAC2WWTBY5U2RLTAWIQIZFMAKRMMZ7B5UQ",
+      "id": "2ZUCZURGAG5IKYX3FD2RMRW64UG3O5EUGTE4PIXCP6UB6TAHHJQA",
       "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
-      "timestamp": 1746679830,
-      "date": "2025-05-08 04:50:30",
-      "round": 276,
+      "timestamp": 1746681305,
+      "date": "2025-05-08 05:15:05",
+      "round": 335,
       "app_args": [
         "abe79c1f..."
       ],
@@ -656,7 +658,7 @@
           "application-args": [
             "q+ecHw=="
           ],
-          "application-id": 1269,
+          "application-id": 1328,
           "foreign-apps": [],
           "foreign-assets": [],
           "global-state-schema": {
@@ -671,14 +673,14 @@
         },
         "close-rewards": 0,
         "closing-amount": 0,
-        "confirmed-round": 276,
+        "confirmed-round": 335,
         "fee": 1000,
-        "first-valid": 275,
+        "first-valid": 334,
         "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
         "genesis-id": "dockernet-v1",
-        "id": "P45EBR65I6E5AVGSN7QAC2WWTBY5U2RLTAWIQIZFMAKRMMZ7B5UQ",
+        "id": "2ZUCZURGAG5IKYX3FD2RMRW64UG3O5EUGTE4PIXCP6UB6TAHHJQA",
         "intra-round-offset": 0,
-        "last-valid": 1275,
+        "last-valid": 1334,
         "local-state-delta": [
           {
             "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
@@ -714,23 +716,27 @@
           "FR98dQAAAAAAAAAB"
         ],
         "receiver-rewards": 0,
-        "round-time": 1746679830,
+        "round-time": 1746681305,
         "sender": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
         "sender-rewards": 0,
         "signature": {
-          "sig": "u9io4WASJL5vVwSv20HkZuJ2zFN18tiUxnWJ7WzqfaDu5SnKkS1pmCOWuuxHeqBIrMnqfg4BMXMCGSUYp8DFDQ=="
+          "sig": "KFlboaGZmDFCEA6f/VV7ES7Za32nXTYlfvgdZYCrCL6acRzKZER39UWAX9OP12b58cai73toFVHHxozJK5hUDg=="
         },
         "tx-type": "appl"
       },
       "tracked_state": {
         "global_state": {
-          "user_id": "",
-          "book_id": "",
-          "address": "",
-          "status": "",
-          "params": ""
+          "user_id": "test_user_001",
+          "book_id": "test_book_002",
+          "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
+          "status": "ACTIVE",
+          "params": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS"
         },
-        "local_state": {}
+        "local_state": {
+          "book_hash": "",
+          "research_hash": "",
+          "params": ""
+        }
       }
     }
   ],
@@ -739,27 +745,11 @@
       "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
       "opted_in": false,
       "local_state": null,
-      "amount": 1036000
+      "amount": 1016000
     }
   ],
-  "csv_export_path": "/home/samaral/projects/algo/20250508/contract/projects/source/db/explorer/test_user_001_test_book_002_1269_transactions.csv",
+  "csv_export_path": "/home/samaral/projects/algo/20250508/contract/projects/source/db/explorer/test_user_001_test_book_002_1328_transactions.csv",
   "raw_global_state": [
-    {
-      "key": "YWRkcmVzcw==",
-      "value": {
-        "bytes": "igykfZv38HzDLVP7nb0g/Sk26leGzvj+JPGCrOkAqT0=",
-        "type": 1,
-        "uint": 0
-      }
-    },
-    {
-      "key": "Ym9va19pZA==",
-      "value": {
-        "bytes": "dGVzdF9ib29rXzAwMg==",
-        "type": 1,
-        "uint": 0
-      }
-    },
     {
       "key": "cGFyYW1z",
       "value": {
@@ -777,6 +767,22 @@
       }
     },
     {
+      "key": "YWRkcmVzcw==",
+      "value": {
+        "bytes": "igykfZv38HzDLVP7nb0g/Sk26leGzvj+JPGCrOkAqT0=",
+        "type": 1,
+        "uint": 0
+      }
+    },
+    {
+      "key": "Ym9va19pZA==",
+      "value": {
+        "bytes": "dGVzdF9ib29rXzAwMg==",
+        "type": 1,
+        "uint": 0
+      }
+    },
+    {
       "key": "dXNlcl9pZA==",
       "value": {
         "bytes": "dGVzdF91c2VyXzAwMQ==",
@@ -784,5 +790,6 @@
         "uint": 0
       }
     }
-  ]
+  ],
+  "deletion_timestamp": 1746823364.5041792
 }

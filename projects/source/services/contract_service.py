@@ -40,32 +40,6 @@ def get_contract_for_user_book(user_id: str, book_id: str) -> Optional[Dict[str,
     Returns:
         Contract info dictionary or None if not found
     """
-    # First check the standard path
-    standard_path = config.CONTRACTS_DIR / f"{user_id}_{book_id}_contract.json"
-
-    if standard_path.exists():
-        with open(standard_path, "r") as f:
-            contract_info = json.load(f)
-
-        # Verify the contract still exists on the blockchain
-        app_id = contract_info["app_id"]
-        if check_application_exists(app_id):
-            logger.info(
-                f"Found existing contract for user {user_id} and book {book_id} with app ID {app_id}"
-            )
-            return contract_info
-        else:
-            logger.warning(
-                f"Contract {app_id} no longer exists on blockchain, removing record"
-            )
-            standard_path.unlink()
-
-            # Also remove app-specific file if it exists
-            app_specific_path = (
-                config.CONTRACTS_DIR / f"{user_id}_{book_id}_{app_id}_contract.json"
-            )
-            if app_specific_path.exists():
-                app_specific_path.unlink()
 
     # If standard path doesn't exist or contract is no longer valid,
     # try to find any other contracts for this user/book
@@ -88,16 +62,20 @@ def get_contract_for_user_book(user_id: str, book_id: str) -> Optional[Dict[str,
                         f"Found existing contract for user {user_id} and book {book_id} with app ID {app_id}"
                     )
 
-                    # Update the standard path file
-                    with open(standard_path, "w") as f:
-                        json.dump(contract_info, f, indent=2)
-
                     return contract_info
                 else:
                     logger.warning(
-                        f"Contract {app_id} no longer exists on blockchain, removing record"
+                        f"Contract {app_id} no longer exists on blockchain, but preserving record"
                     )
-                    file_path.unlink()
+                    # Mark as deleted instead of removing
+                    contract_info["blockchain_status"] = "Deleted"
+                    contract_info["deletion_note"] = (
+                        "Contract no longer exists on blockchain"
+                    )
+
+                    # Save the updated contract info back to this file
+                    with open(file_path, "w") as f:
+                        json.dump(contract_info, f, indent=2)
             except Exception as e:
                 logger.error(f"Error loading contract from {file_path}: {e}")
 
@@ -261,12 +239,6 @@ def deploy_contract_for_user_book(
         "status": "ACTIVE",
     }
 
-    # Save to database - BOTH with app ID in filename and without for backward compatibility
-    # Standard path (for backward compatibility)
-    standard_path = config.CONTRACTS_DIR / f"{user_id}_{book_id}_contract.json"
-    with open(standard_path, "w") as f:
-        json.dump(contract_info, f, indent=2)
-
     # App-specific path
     app_specific_path = (
         config.CONTRACTS_DIR / f"{user_id}_{book_id}_{app_id}_contract.json"
@@ -344,40 +316,13 @@ def remove_contract(user_id: str, book_id: str, force: bool = False) -> bool:
 
     app_id = contract_info["app_id"]
 
-    # Check for existing explorer data before deletion
+    # Paths to explorer data (but we won't attempt to create it here)
     standard_explorer_path = (
         config.DB_DIR / "explorer" / f"{user_id}_{book_id}_explorer.json"
     )
     app_specific_explorer_path = (
         config.DB_DIR / "explorer" / f"{user_id}_{book_id}_{app_id}_explorer.json"
     )
-
-    if not standard_explorer_path.exists() and not app_specific_explorer_path.exists():
-        # Only explore if we don't already have explorer data
-        from services.explorer_service import explore_contract
-
-        try:
-            logger.info(f"Archiving contract state before deletion")
-            explore_contract(user_id, book_id)
-        except Exception as e:
-            logger.error(f"Error archiving contract state: {e}")
-    else:
-        logger.info(f"Explorer data already exists, skipping pre-deletion exploration")
-
-        # Load existing explorer data to preserve it
-        explorer_data = None
-        explorer_path_to_use = (
-            app_specific_explorer_path
-            if app_specific_explorer_path.exists()
-            else standard_explorer_path
-        )
-
-        with open(explorer_path_to_use, "r") as f:
-            explorer_data = json.load(f)
-
-        # Keep track of the global state
-        preserved_global_state = explorer_data.get("global_state", {})
-        preserved_raw_state = explorer_data.get("raw_global_state", [])
 
     # Set contract to inactive first
     if not set_contract_status(app_id, "INACTIVE-STOP"):
@@ -397,46 +342,39 @@ def remove_contract(user_id: str, book_id: str, force: bool = False) -> bool:
     contract_info["deletion_timestamp"] = time.time()
 
     # Save updated contract info (but don't remove from database) - to both paths
-    standard_path = config.CONTRACTS_DIR / f"{user_id}_{book_id}_contract.json"
     app_specific_path = (
         config.CONTRACTS_DIR / f"{user_id}_{book_id}_{app_id}_contract.json"
     )
 
-    with open(standard_path, "w") as f:
-        json.dump(contract_info, f, indent=2)
-
     with open(app_specific_path, "w") as f:
         json.dump(contract_info, f, indent=2)
 
-    # Update the explorer data to mark as deleted but preserve data
-    if standard_explorer_path.exists() or app_specific_explorer_path.exists():
-        explorer_path_to_use = (
-            app_specific_explorer_path
-            if app_specific_explorer_path.exists()
-            else standard_explorer_path
-        )
+    # Update the explorer data to mark as deleted but preserve data - if it exists
+    explorer_paths = []
+    if standard_explorer_path.exists():
+        explorer_paths.append(standard_explorer_path)
+    if app_specific_explorer_path.exists():
+        explorer_paths.append(app_specific_explorer_path)
 
-        with open(explorer_path_to_use, "r") as f:
-            explorer_data = json.load(f)
+    for explorer_path in explorer_paths:
+        try:
+            with open(explorer_path, "r") as f:
+                explorer_data = json.load(f)
 
-        # Update deletion status but preserve the previously captured data
-        explorer_data["blockchain_status"] = "Deleted"
-        explorer_data["deletion_timestamp"] = time.time()
-        explorer_data["contract_info"] = contract_info
+            # Update deletion status but preserve the previously captured data
+            explorer_data["blockchain_status"] = "Deleted"
+            explorer_data["deletion_timestamp"] = time.time()
+            explorer_data["contract_info"] = contract_info
 
-        # Don't clear out the previously retrieved data
-        if "global_state" in explorer_data and not explorer_data.get("global_state"):
-            # If global state is empty, restore the preserved state
-            if "preserved_global_state" in locals() and preserved_global_state:
-                explorer_data["global_state"] = preserved_global_state
-                explorer_data["raw_global_state"] = preserved_raw_state
+            # Save updated explorer data
+            with open(explorer_path, "w") as f:
+                json.dump(explorer_data, f, indent=2)
 
-        # Save updated explorer data to both paths
-        with open(standard_explorer_path, "w") as f:
-            json.dump(explorer_data, f, indent=2)
-
-        with open(app_specific_explorer_path, "w") as f:
-            json.dump(explorer_data, f, indent=2)
+            logger.info(
+                f"Updated explorer data at {explorer_path} with deletion status"
+            )
+        except Exception as e:
+            logger.error(f"Error updating explorer data at {explorer_path}: {e}")
 
     logger.info(
         f"Contract {app_id} successfully removed from blockchain but archived locally"

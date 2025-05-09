@@ -183,7 +183,6 @@ def run_full_workflow(
     try:
         from services.explorer_service import (
             explore_contract,
-            export_transactions_to_csv,
         )
 
         # First get the JSON data without CSV generation
@@ -193,7 +192,7 @@ def run_full_workflow(
 
         if explorer_info:
             logger.info(
-                f"Contract exploration complete, information saved to db/explorer/{user_id}_{book_id}_explorer.json"
+                f"Contract exploration complete, information saved to db/explorer/{user_id}_{book_id}_{app_id}_explorer.json"
             )
 
             # Check if any transactions were found

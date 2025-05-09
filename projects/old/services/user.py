@@ -4,14 +4,14 @@ import logging
 import sys
 from typing import Dict, Any
 
-from projects.source.services.config import USER_MNEMONIC
-from projects.source.services.utils import (
+from projects.old.services.config import USER_MNEMONIC
+from projects.old.services.utils import (
     get_algod_client,
     get_account_from_mnemonic,
     get_app_client,
     encode_params,
     decode_params,
-    log_transaction_result
+    log_transaction_result,
 )
 
 # Configure logging
@@ -46,11 +46,7 @@ class ContractUser:
         logger.info(f"Successfully opted in to contract: {app_id}")
 
     def update_local_state(
-        self,
-        app_id: int,
-        file_hash: str,
-        research_hash: str,
-        params: Dict[str, Any]
+        self, app_id: int, file_hash: str, research_hash: str, params: Dict[str, Any]
     ) -> None:
         """
         Update the local state in a contract.
@@ -149,22 +145,32 @@ def main():
 
     # Opt in command
     opt_in_parser = subparsers.add_parser("opt-in", help="Opt in to a contract")
-    opt_in_parser.add_argument("--app-id", required=True, type=int, help="Application ID")
+    opt_in_parser.add_argument(
+        "--app-id", required=True, type=int, help="Application ID"
+    )
 
     # Update local state command
     update_parser = subparsers.add_parser("update-local", help="Update local state")
-    update_parser.add_argument("--app-id", required=True, type=int, help="Application ID")
+    update_parser.add_argument(
+        "--app-id", required=True, type=int, help="Application ID"
+    )
     update_parser.add_argument("--file-hash", required=True, help="File hash")
     update_parser.add_argument("--research-hash", required=True, help="Research hash")
-    update_parser.add_argument("--parameters", required=True, help="JSON string of parameters")
+    update_parser.add_argument(
+        "--parameters", required=True, help="JSON string of parameters"
+    )
 
     # Close out command
     close_parser = subparsers.add_parser("close-out", help="Close out from a contract")
-    close_parser.add_argument("--app-id", required=True, type=int, help="Application ID")
+    close_parser.add_argument(
+        "--app-id", required=True, type=int, help="Application ID"
+    )
 
     # Get local state command
     state_parser = subparsers.add_parser("local-state", help="Get local state")
-    state_parser.add_argument("--app-id", required=True, type=int, help="Application ID")
+    state_parser.add_argument(
+        "--app-id", required=True, type=int, help="Application ID"
+    )
 
     args = parser.parse_args()
 
@@ -178,10 +184,7 @@ def main():
         elif args.command == "update-local":
             parameters = json.loads(args.parameters)
             user.update_local_state(
-                args.app_id,
-                args.file_hash,
-                args.research_hash,
-                parameters
+                args.app_id, args.file_hash, args.research_hash, parameters
             )
             print(f"Successfully updated local state in contract: {args.app_id}")
 

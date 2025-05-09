@@ -37,9 +37,9 @@ def deploy() -> None:
         )
 
         # Initialize the contract with sample values
-        g_user_id = bytes("user123", "utf-8")
-        g_book_id = bytes("book456", "utf-8")
-        g_params = bytes("param1:value1|param2:value2", "utf-8")
+        g_user_id = bytes("", "utf-8")
+        g_book_id = bytes("", "utf-8")
+        g_params = bytes("", "utf-8")
 
         response = app_client.send.initialize(args=(g_user_id, g_book_id, g_params))
         logger.info(

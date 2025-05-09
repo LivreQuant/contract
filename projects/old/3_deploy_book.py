@@ -5,12 +5,9 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import base64
-import hashlib
 
-# Load environment variables
 load_dotenv()
 
-# Import algokit utils and other necessary modules
 from algosdk import account, mnemonic, encoding
 from algosdk.v2client import algod
 from algosdk import transaction
@@ -118,7 +115,7 @@ def deploy_trader_contract():
     logger.info(f"User balance: {user_balance} Algos")
 
     # Load approval and clear programs
-    artifacts_dir = Path("artifacts")
+    artifacts_dir = Path("../source/artifacts")
 
     # First, find the file with .teal extension for the approval program
     approval_files = list(artifacts_dir.glob("*.teal"))

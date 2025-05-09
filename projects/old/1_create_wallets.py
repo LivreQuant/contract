@@ -1,7 +1,6 @@
 import json
 import os
 import subprocess
-import time
 from pathlib import Path
 from algosdk import account, mnemonic
 
@@ -72,7 +71,7 @@ def update_env_file(admin_mnemonic, user_mnemonic):
         admin_mnemonic: The mnemonic for the admin wallet
         user_mnemonic: The mnemonic for the user wallet
     """
-    env_path = Path(".env")
+    env_path = Path("../source/.env")
 
     # Read existing .env file if it exists
     if env_path.exists():

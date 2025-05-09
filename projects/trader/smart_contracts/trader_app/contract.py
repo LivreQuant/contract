@@ -28,7 +28,7 @@ class BookContract(ARC4Contract):
     # CONTRACT ADDRESS: ADDRESS THAT IS ALLOWED TO INTERACT WITH THE SMART CONTRACT
     # g_address: Account
 
-    # STATUS: ACTIVE | INACTIVE-STOP | INACTIVE-SOLD
+    # STATUS: INACTIVE-INIT > ACTIVE > INACTIVE-STOP | INACTIVE-SOLD
     # g_status: String
 
     # PARAMETERS: REGION | ASSET CLASS | INSTRUMENT CLASS | ETC FOR EASY LOOKUP
@@ -68,7 +68,7 @@ class BookContract(ARC4Contract):
             "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
         )
         self.g_params.value = parameters
-        self.g_status.value = String("ACTIVE")
+        self.g_status.value = String("INACTIVE-INIT")
 
         return UInt64(1)
 
@@ -90,7 +90,6 @@ class BookContract(ARC4Contract):
     def close_out(self) -> UInt64:
         """Handle user closing out from the contract."""
         assert Txn.sender == self.g_address.value, "Only authorized user can close out"
-        assert self.g_status.value == String("ACTIVE"), "Contract must be active"
 
         # Reset local state (though this is unnecessary as values will be deleted)
         self.l_book_hash[Txn.sender] = Bytes(b"NAN")
@@ -123,6 +122,7 @@ class BookContract(ARC4Contract):
         self.g_book_id.value = new_book_id
         self.g_address.value = new_address
         self.g_params.value = new_params
+        self.g_status.value = String("ACTIVE")
 
         return UInt64(1)
 

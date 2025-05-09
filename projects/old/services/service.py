@@ -3,9 +3,9 @@ import json
 import time
 from typing import Dict, Any, Optional
 
-from projects.source.services.admin import ContractAdmin
-from projects.source.services.user import ContractUser
-from projects.source.services.config import ADMIN_MNEMONIC, USER_MNEMONIC
+from projects.old.services.admin import ContractAdmin
+from projects.old.services.user import ContractUser
+from projects.old.services.config import ADMIN_MNEMONIC, USER_MNEMONIC
 
 # Configure logging
 logger = logging.getLogger("assets_contract.service")
@@ -15,9 +15,7 @@ class AssetsContractService:
     """Service for managing the full lifecycle of Assets Contracts."""
 
     def __init__(
-        self,
-        admin_mnemonic: str = ADMIN_MNEMONIC,
-        user_mnemonic: str = USER_MNEMONIC
+        self, admin_mnemonic: str = ADMIN_MNEMONIC, user_mnemonic: str = USER_MNEMONIC
     ):
         """Initialize the service with admin and user components."""
         self.admin = ContractAdmin(admin_mnemonic)
@@ -25,10 +23,7 @@ class AssetsContractService:
         logger.info("Assets Contract Service initialized")
 
     def create_contract_and_opt_in(
-        self,
-        user_id: str,
-        asset_id: str,
-        parameters: Dict[str, Any]
+        self, user_id: str, asset_id: str, parameters: Dict[str, Any]
     ) -> int:
         """
         Create a contract and opt in the user.
@@ -43,10 +38,7 @@ class AssetsContractService:
         """
         # Create the contract with the admin
         app_id = self.admin.create_contract(
-            self.user.user_account.address,
-            user_id,
-            asset_id,
-            parameters
+            self.user.user_account.address, user_id, asset_id, parameters
         )
 
         # Give the transaction time to confirm
@@ -68,7 +60,7 @@ class AssetsContractService:
         global_parameters: Dict[str, Any],
         file_hash: str,
         research_hash: str,
-        local_parameters: Dict[str, Any]
+        local_parameters: Dict[str, Any],
     ) -> None:
         """
         Update both global and local state in a single operation.
@@ -94,10 +86,7 @@ class AssetsContractService:
         # Update local state
         try:
             self.user.update_local_state(
-                app_id,
-                file_hash,
-                research_hash,
-                local_parameters
+                app_id, file_hash, research_hash, local_parameters
             )
             logger.info(f"Local state updated for app ID: {app_id}")
         except Exception as e:
@@ -156,7 +145,7 @@ class AssetsContractService:
             "app_id": app_id,
             "global_state": global_state,
             "local_state": local_state,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
 
     def export_contract_state(self, app_id: int, filename: Optional[str] = None) -> str:
@@ -207,7 +196,9 @@ class AssetsContractService:
         local_state = self.user.get_local_state(app_id)
         return len(local_state) > 0
 
-    def get_contract_by_user_and_asset(self, user_id: str, asset_id: str) -> Optional[int]:
+    def get_contract_by_user_and_asset(
+        self, user_id: str, asset_id: str
+    ) -> Optional[int]:
         """
         Find a contract matching the given user and asset IDs.
 
@@ -237,7 +228,7 @@ def main():
     app_id = service.create_contract_and_opt_in(
         user_id="user123",
         asset_id="asset456",
-        parameters={"param1": "value1", "param2": "value2"}
+        parameters={"param1": "value1", "param2": "value2"},
     )
 
     print(f"Contract created with app ID: {app_id}")
@@ -248,10 +239,14 @@ def main():
     # Update the contract
     service.update_contract_and_local_state(
         app_id=app_id,
-        global_parameters={"param1": "new_value1", "param2": "new_value2", "param3": "value3"},
+        global_parameters={
+            "param1": "new_value1",
+            "param2": "new_value2",
+            "param3": "value3",
+        },
         file_hash="file_hash_123",
         research_hash="research_hash_456",
-        local_parameters={"local_param1": "local_value1"}
+        local_parameters={"local_param1": "local_value1"},
     )
 
     # Check and export the state
@@ -269,7 +264,7 @@ def main():
     # Close the contract after a bit
     time.sleep(5)
     close_contract = input("Close and delete the contract? (y/n): ")
-    if close_contract.lower() == 'y':
+    if close_contract.lower() == "y":
         service.close_contract(app_id, delete_contract=True)
         print(f"Contract {app_id} closed and deleted")
 

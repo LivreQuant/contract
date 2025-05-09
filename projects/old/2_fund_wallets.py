@@ -2,11 +2,9 @@ import os
 import json
 from pathlib import Path
 from dotenv import load_dotenv
-import algosdk
 from algosdk.v2client import algod
 from algosdk import account, mnemonic, transaction
 
-# Load environment variables from .env file
 load_dotenv()
 
 
@@ -146,7 +144,7 @@ def load_or_create_wallet(name, env_var):
         }
 
         # Update .env file
-        env_path = Path(".env")
+        env_path = Path("../source/.env")
         if env_path.exists():
             with open(env_path, "r") as f:
                 env_content = f.read()

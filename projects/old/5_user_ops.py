@@ -1,13 +1,12 @@
 import logging
 import json
-import time
 import os
 import argparse
 from pathlib import Path
 from dotenv import load_dotenv
 import base64
 
-from algosdk import account, mnemonic, encoding
+from algosdk import account, mnemonic
 from algosdk.v2client import algod
 
 # Load environment variables
@@ -367,7 +366,7 @@ def close_out_from_contract(app_id):
 
 def get_latest_contract_id():
     """Get the latest contract ID from the most recent contract info file."""
-    contract_files = list(Path(".").glob("contract_*_info.json"))
+    contract_files = list(Path("../source").glob("contract_*_info.json"))
     if not contract_files:
         raise FileNotFoundError("No contract info files found")
 

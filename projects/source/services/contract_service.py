@@ -273,7 +273,7 @@ def set_contract_status(app_id: int, status: str) -> bool:
 
 def remove_contract(user_id: str, book_id: str, force: bool = False) -> bool:
     """
-    Remove a contract from the blockchain and database.
+    Remove a contract from the blockchain (but archive it locally).
 
     Args:
         user_id: User identifier
@@ -291,6 +291,28 @@ def remove_contract(user_id: str, book_id: str, force: bool = False) -> bool:
 
     app_id = contract_info["app_id"]
 
+    # Check for existing explorer data before deletion
+    explorer_path = config.DB_DIR / "explorer" / f"{user_id}_{book_id}_explorer.json"
+    if not explorer_path.exists():
+        # Only explore if we don't already have explorer data
+        from services.explorer_service import explore_contract
+
+        try:
+            logger.info(f"Archiving contract state before deletion")
+            explore_contract(user_id, book_id)
+        except Exception as e:
+            logger.error(f"Error archiving contract state: {e}")
+    else:
+        logger.info(f"Explorer data already exists, skipping pre-deletion exploration")
+
+        # Load existing explorer data to preserve it
+        with open(explorer_path, "r") as f:
+            explorer_data = json.load(f)
+
+        # Keep track of the global state
+        preserved_global_state = explorer_data.get("global_state", {})
+        preserved_raw_state = explorer_data.get("raw_global_state", [])
+
     # Set contract to inactive first
     if not set_contract_status(app_id, "INACTIVE-STOP"):
         logger.error(f"Failed to set contract {app_id} to inactive status")
@@ -304,10 +326,37 @@ def remove_contract(user_id: str, book_id: str, force: bool = False) -> bool:
         logger.error(f"Error deleting contract {app_id}: {e}")
         return False
 
-    # Remove contract from database
-    contract_path = config.CONTRACTS_DIR / f"{user_id}_{book_id}_contract.json"
-    if contract_path.exists():
-        contract_path.unlink()
+    # Update contract info with deletion status
+    contract_info["blockchain_status"] = "Deleted"
+    contract_info["deletion_timestamp"] = time.time()
 
-    logger.info(f"Contract {app_id} successfully removed")
+    # Save updated contract info (but don't remove from database)
+    contract_path = config.CONTRACTS_DIR / f"{user_id}_{book_id}_contract.json"
+    with open(contract_path, "w") as f:
+        json.dump(contract_info, f, indent=2)
+
+    # Update the explorer data to mark as deleted but preserve data
+    if explorer_path.exists():
+        with open(explorer_path, "r") as f:
+            explorer_data = json.load(f)
+
+        # Update deletion status but preserve the previously captured data
+        explorer_data["blockchain_status"] = "Deleted"
+        explorer_data["deletion_timestamp"] = time.time()
+        explorer_data["contract_info"] = contract_info
+
+        # Don't clear out the previously retrieved data
+        if "global_state" in explorer_data and not explorer_data.get("global_state"):
+            # If global state is empty, restore the preserved state
+            if "preserved_global_state" in locals():
+                explorer_data["global_state"] = preserved_global_state
+                explorer_data["raw_global_state"] = preserved_raw_state
+
+        # Save updated explorer data
+        with open(explorer_path, "w") as f:
+            json.dump(explorer_data, f, indent=2)
+
+    logger.info(
+        f"Contract {app_id} successfully removed from blockchain but archived locally"
+    )
     return True

@@ -148,9 +148,31 @@ def run_full_workflow(
         )
 
     if interactive:
-        input("Press Enter to continue to Step 8: Admin deletes contract...")
+        input("Press Enter to continue to Step 9: Explore contract...")
 
-    # Step 8: Admin deletes contract
+    # Step 8: Explore contract and save detailed information
+    logger.info("STEP 8: Explore contract and save detailed information")
+    try:
+        from services.explorer_service import explore_contract
+
+        explorer_info = explore_contract(user_id, book_id, include_csv=True)
+        if explorer_info:
+            logger.info(
+                f"Contract exploration complete, information saved to db/explorer/{user_id}_{book_id}_explorer.json"
+            )
+            if "csv_export_path" in explorer_info:
+                logger.info(
+                    f"Transaction history exported to {explorer_info['csv_export_path']}"
+                )
+        else:
+            logger.error("Contract exploration failed")
+    except Exception as e:
+        logger.error(f"Error exploring contract: {e}")
+
+    if interactive:
+        input("Press Enter to continue to Step 9: Delete contract...")
+
+    # Step 9: Admin deletes contract (formerly Step 8)
     logger.info("STEP 8: Admin deletes contract")
     if remove_contract(user_id, book_id, force=True):
         logger.info("Contract deletion successful")

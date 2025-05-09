@@ -1,0 +1,83 @@
+{
+  "user_id": "test_user_001",
+  "book_id": "test_book_002",
+  "app_id": 1167,
+  "creation_timestamp": 1746814248.161957,
+  "exploration_timestamp": 1746814252.272521,
+  "blockchain_status": "Deleted",
+  "contract_info": {
+    "app_id": 1167,
+    "app_address": "YTPUNWEOK3NXGM7EV7JJJZVQHUXYRVUARUM32QFRWABTIDJ2ZFIZBY2LZU",
+    "user_id": "test_user_001",
+    "user_address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
+    "book_id": "test_book_002",
+    "parameters": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
+    "creation_timestamp": 1746814248.161957,
+    "status": "ACTIVE",
+    "blockchain_status": "Deleted",
+    "deletion_timestamp": 1746814253.7937982
+  },
+  "global_state": {
+    "params": "String: region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
+    "status": "String: ACTIVE",
+    "address": "Address: RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
+    "book_id": "String: test_book_002",
+    "user_id": "String: test_user_001"
+  },
+  "participants": [],
+  "transactions_csv_path": "/home/samaral/projects/algo/20250508/contract/projects/source/db/explorer/test_user_001_test_book_002_transactions.csv",
+  "detailed_transactions_csv_path": "/home/samaral/projects/algo/20250508/contract/projects/source/db/explorer/test_user_001_test_book_002_detailed_transactions.csv",
+  "transaction_count": 0,
+  "final_global_state": {
+    "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
+    "book_id": "test_book_002",
+    "params": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
+    "status": "ACTIVE",
+    "user_id": "test_user_001"
+  },
+  "final_local_states": {},
+  "raw_global_state": [
+    {
+      "key": "cGFyYW1z",
+      "value": {
+        "bytes": "cmVnaW9uOk5BfGFzc2V0X2NsYXNzOkVRVUlUSUVTfGluc3RydW1lbnRfY2xhc3M6U1RPQ0tT",
+        "type": 1,
+        "uint": 0
+      }
+    },
+    {
+      "key": "c3RhdHVz",
+      "value": {
+        "bytes": "QUNUSVZF",
+        "type": 1,
+        "uint": 0
+      }
+    },
+    {
+      "key": "YWRkcmVzcw==",
+      "value": {
+        "bytes": "igykfZv38HzDLVP7nb0g/Sk26leGzvj+JPGCrOkAqT0=",
+        "type": 1,
+        "uint": 0
+      }
+    },
+    {
+      "key": "Ym9va19pZA==",
+      "value": {
+        "bytes": "dGVzdF9ib29rXzAwMg==",
+        "type": 1,
+        "uint": 0
+      }
+    },
+    {
+      "key": "dXNlcl9pZA==",
+      "value": {
+        "bytes": "dGVzdF91c2VyXzAwMQ==",
+        "type": 1,
+        "uint": 0
+      }
+    }
+  ],
+  "participants_error": "Indexer client does not support search_accounts method",
+  "deletion_timestamp": 1746814253.7944908
+}

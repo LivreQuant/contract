@@ -508,7 +508,7 @@ def admin_update_contract_global(
         create_method_signature("update_global(byte[],byte[],account,byte[])uint64"),
         user_id_bytes,
         book_id_bytes,
-        (0).to_bytes(8, "big"),  # Index 0 in accounts array
+        (1).to_bytes(8, "big"),  # Index 0 in accounts array
         params_bytes,
     ]
 

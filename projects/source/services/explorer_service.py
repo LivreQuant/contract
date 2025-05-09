@@ -4,8 +4,7 @@ import json
 import logging
 import time
 import base64
-from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 
 import config
 from utils.algorand import (
@@ -34,210 +33,6 @@ def decode_base64_values(values_list):
         except:
             decoded_values.append(value)
     return decoded_values
-
-
-def enhance_transactions_with_state(transactions: List[Dict[str, Any]]) -> None:
-    """
-    Enhance transactions with cumulative state tracking using deltas.
-    """
-    logger.info(f"Starting state tracking for {len(transactions)} transactions")
-
-    # Initialize state tracking
-    current_global_state = {
-        "user_id": "",
-        "book_id": "",
-        "address": "",
-        "status": "",
-        "params": "",
-    }
-
-    # Local state tracking per address
-    current_local_states = {}  # address -> {key: value}
-
-    # Process transactions in chronological order
-    for tx_idx, tx in enumerate(transactions):
-        logger.debug(
-            f"Processing transaction {tx_idx+1}/{len(transactions)}: {tx.get('id', 'unknown')}"
-        )
-
-        # Process global state delta
-        if "raw_tx" in tx and "global-state-delta" in tx["raw_tx"]:
-            logger.debug(
-                f"Transaction has global state delta with {len(tx['raw_tx']['global-state-delta'])} items"
-            )
-            for delta in tx["raw_tx"]["global-state-delta"]:
-                try:
-                    # Decode the key
-                    key_b64 = delta["key"]
-                    key = base64.b64decode(key_b64).decode("utf-8")
-
-                    logger.debug(f"Processing global state key: {key}")
-
-                    # Skip keys not in our tracking
-                    if key not in current_global_state:
-                        logger.debug(
-                            f"Key {key} not in global state tracking, skipping"
-                        )
-                        continue
-
-                    # Process the value based on action
-                    value_obj = delta["value"]
-                    if "action" not in value_obj:
-                        logger.warning(f"Missing 'action' in value object: {value_obj}")
-                        continue
-
-                    if value_obj["action"] == 1:  # Update
-                        # Check if it has bytes (it's a string/bytes value)
-                        if "bytes" in value_obj:
-                            # Use the decode_base64_values function
-                            decoded_values = decode_base64_values([value_obj["bytes"]])
-                            decoded_value = decoded_values[0] if decoded_values else ""
-
-                            # Special handling for address
-                            if key == "address" and len(decoded_value) != len(
-                                base64.b64decode(value_obj["bytes"]).decode(
-                                    "utf-8", errors="ignore"
-                                )
-                            ):
-                                try:
-                                    addr_bytes = base64.b64decode(value_obj["bytes"])
-                                    if len(addr_bytes) == 32:
-                                        from algosdk import encoding
-
-                                        decoded_value = encoding.encode_address(
-                                            addr_bytes
-                                        )
-                                        logger.debug(
-                                            f"Decoded address: {decoded_value}"
-                                        )
-                                except Exception as e:
-                                    logger.warning(f"Failed to decode address: {e}")
-
-                            logger.debug(f"Decoded {key} value: {decoded_value}")
-                            current_global_state[key] = decoded_value
-                        # Check if it has uint (it's an integer value)
-                        elif "uint" in value_obj:
-                            uint_value = str(value_obj["uint"])
-                            logger.debug(f"Using uint value for {key}: {uint_value}")
-                            current_global_state[key] = uint_value
-                        else:
-                            logger.warning(
-                                f"Value object has neither bytes nor uint: {value_obj}"
-                            )
-                    elif value_obj["action"] == 2:  # Delete
-                        logger.debug(f"Deleting value for key {key}")
-                        current_global_state[key] = ""
-                except Exception as e:
-                    logger.error(
-                        f"Error processing global state delta: {e}", exc_info=True
-                    )
-
-        # Process local state delta
-        if "raw_tx" in tx and "local-state-delta" in tx["raw_tx"]:
-            logger.debug(
-                f"Transaction has local state delta with {len(tx['raw_tx']['local-state-delta'])} accounts"
-            )
-            try:
-                for account_delta in tx["raw_tx"]["local-state-delta"]:
-                    addr = account_delta["address"]
-                    logger.debug(f"Processing local state for address: {addr}")
-
-                    # Initialize local state for this address if not exists
-                    if addr not in current_local_states:
-                        logger.debug(f"Initializing local state for address: {addr}")
-                        current_local_states[addr] = {
-                            "book_hash": "",
-                            "research_hash": "",
-                            "params": "",
-                        }
-
-                    # Update local state based on deltas
-                    for delta in account_delta.get("delta", []):
-                        try:
-                            key_b64 = delta["key"]
-                            key = base64.b64decode(key_b64).decode("utf-8")
-
-                            logger.debug(f"Processing local state key: {key}")
-
-                            # Skip keys not in our tracking
-                            if key not in current_local_states[addr]:
-                                logger.debug(
-                                    f"Key {key} not in local state tracking for {addr}, skipping"
-                                )
-                                continue
-
-                            # Process value based on action
-                            value_obj = delta["value"]
-                            if "action" not in value_obj:
-                                logger.warning(
-                                    f"Missing 'action' in local value object: {value_obj}"
-                                )
-                                continue
-
-                            if value_obj["action"] == 1:  # Update
-                                # Check for bytes value
-                                if "bytes" in value_obj:
-                                    # Use the decode_base64_values function
-                                    decoded_values = decode_base64_values(
-                                        [value_obj["bytes"]]
-                                    )
-                                    decoded_value = (
-                                        decoded_values[0] if decoded_values else ""
-                                    )
-
-                                    logger.debug(
-                                        f"Decoded local {key} value: {decoded_value}"
-                                    )
-                                    current_local_states[addr][key] = decoded_value
-                                # Check for uint value
-                                elif "uint" in value_obj:
-                                    uint_value = str(value_obj["uint"])
-                                    logger.debug(
-                                        f"Using local uint value for {key}: {uint_value}"
-                                    )
-                                    current_local_states[addr][key] = uint_value
-                                else:
-                                    logger.warning(
-                                        f"Local value object has neither bytes nor uint: {value_obj}"
-                                    )
-                            elif value_obj["action"] == 2:  # Delete
-                                logger.debug(f"Deleting local value for key {key}")
-                                current_local_states[addr][key] = ""
-                        except Exception as e:
-                            logger.error(
-                                f"Error processing local state delta item: {e}",
-                                exc_info=True,
-                            )
-            except Exception as e:
-                logger.error(f"Error processing local state delta: {e}", exc_info=True)
-
-        # Handle OptIn and CloseOut cases from on_completion
-        on_completion = tx.get("on_completion")
-        sender = tx.get("sender")
-
-        if on_completion == "optin" and sender not in current_local_states:
-            logger.debug(f"OptIn operation for {sender}, initializing local state")
-            current_local_states[sender] = {
-                "book_hash": "NAN",
-                "research_hash": "NAN",
-                "params": "NAN",
-            }
-        elif on_completion == "closeout" and sender in current_local_states:
-            logger.debug(f"CloseOut operation for {sender}, clearing local state")
-            current_local_states[sender] = {
-                "book_hash": "",
-                "research_hash": "",
-                "params": "",
-            }
-
-        # Save the current state to the transaction
-        tx["tracked_state"] = {
-            "global_state": current_global_state.copy(),
-            "local_state": current_local_states.get(sender, {}).copy(),
-        }
-        logger.debug(f"Updated tracked state for transaction {tx.get('id', 'unknown')}")
-
-    logger.info(f"Completed state tracking for {len(transactions)} transactions")
 
 
 def explore_contract(
@@ -721,132 +516,205 @@ def process_transaction(tx: Dict[str, Any], transactions: List[Dict[str, Any]]) 
     return False
 
 
-def get_all_contracts() -> List[Dict[str, Any]]:
+def enhance_transactions_with_state(transactions: List[Dict[str, Any]]) -> None:
     """
-    Get a list of all contracts in the system.
-
-    Returns:
-        List of contract dictionaries
+    Enhance transactions with cumulative state tracking using deltas.
     """
-    contracts = []
+    logger.info(f"Starting state tracking for {len(transactions)} transactions")
 
-    # Search for all contract files
-    contract_files = list(config.CONTRACTS_DIR.glob("*_contract.json"))
+    # Initialize state tracking
+    current_global_state = {
+        "user_id": "",
+        "book_id": "",
+        "address": "",
+        "status": "",
+        "params": "",
+    }
 
-    for file_path in contract_files:
-        try:
-            with open(file_path, "r") as f:
-                contract_info = json.load(f)
+    # Local state tracking per address
+    current_local_states = {}  # address -> {key: value}
 
-            # Check if this contract still exists on the blockchain
-            app_id = contract_info.get("app_id")
-            if app_id and check_application_exists(app_id):
-                contract_info["blockchain_status"] = "Active"
-            else:
-                contract_info["blockchain_status"] = contract_info.get(
-                    "blockchain_status", "Unknown"
-                )
-
-            contracts.append(contract_info)
-        except Exception as e:
-            logger.error(f"Error loading contract from {file_path}: {e}")
-
-    # Sort by creation timestamp (newest first)
-    contracts.sort(key=lambda x: x.get("creation_timestamp", 0), reverse=True)
-
-    return contracts
-
-
-def export_transactions_to_csv(
-    explorer_info: Dict[str, Any], output_path: str = None
-) -> str:
-    """Export transactions from explorer info to CSV with properly tracked state."""
-    transactions = explorer_info.get("transaction_history", [])
-    if not transactions:
-        logger.warning("No transactions to export")
-        return None
-
-    logger.info(f"Exporting {len(transactions)} transactions to CSV")
-
-    if not output_path:
-        user_id = explorer_info.get("user_id", "unknown")
-        book_id = explorer_info.get("book_id", "unknown")
-        app_id = explorer_info.get("app_id", "unknown")
-        output_path = (
-            config.DB_DIR
-            / "explorer"
-            / f"{user_id}_{book_id}_{app_id}_transactions.csv"
+    # Process transactions in chronological order
+    for tx_idx, tx in enumerate(transactions):
+        logger.debug(
+            f"Processing transaction {tx_idx+1}/{len(transactions)}: {tx.get('id', 'unknown')}"
         )
 
-    # First, ensure all transactions have state tracking
-    try:
-        logger.info("Enhancing transactions with state tracking")
-        enhance_transactions_with_state(transactions)
-    except Exception as e:
-        logger.error(f"Error enhancing transactions with state: {e}", exc_info=True)
-        return None
-
-    # Define CSV fields
-    fieldnames = [
-        "transaction_id",
-        "date",
-        "sender",
-        "action",
-        "g_user_id",
-        "g_book_id",
-        "g_address",
-        "g_status",
-        "g_params",
-        "l_book_hash",
-        "l_research_hash",
-        "l_params",
-    ]
-
-    # Open CSV file and write transactions
-    try:
-        with open(output_path, "w", newline="") as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-
-            for tx_idx, tx in enumerate(transactions):
+        # Process global state delta
+        if "raw_tx" in tx and "global-state-delta" in tx["raw_tx"]:
+            logger.debug(
+                f"Transaction has global state delta with {len(tx['raw_tx']['global-state-delta'])} items"
+            )
+            for delta in tx["raw_tx"]["global-state-delta"]:
                 try:
-                    # Get the tracked state from the transaction
-                    state = tx.get("tracked_state", {})
-                    if not state:
-                        logger.warning(f"Transaction {tx_idx} has no tracked state")
-                        state = {"global_state": {}, "local_state": {}}
+                    # Decode the key
+                    key_b64 = delta["key"]
+                    key = base64.b64decode(key_b64).decode("utf-8")
 
-                    global_state = state.get("global_state", {})
-                    local_state = state.get("local_state", {})
+                    logger.debug(f"Processing global state key: {key}")
 
-                    # Create the row data
-                    row = {
-                        "transaction_id": tx.get("id", ""),
-                        "date": tx.get("date", ""),
-                        "sender": tx.get("sender", ""),
-                        "action": tx.get("on_completion", "noop"),
-                        "g_user_id": global_state.get("user_id", ""),
-                        "g_book_id": global_state.get("book_id", ""),
-                        "g_address": global_state.get("address", ""),
-                        "g_status": global_state.get("status", ""),
-                        "g_params": global_state.get("params", ""),
-                        "l_book_hash": local_state.get("book_hash", ""),
-                        "l_research_hash": local_state.get("research_hash", ""),
-                        "l_params": local_state.get("params", ""),
-                    }
+                    # Skip keys not in our tracking
+                    if key not in current_global_state:
+                        logger.debug(
+                            f"Key {key} not in global state tracking, skipping"
+                        )
+                        continue
 
-                    writer.writerow(row)
+                    # Process the value based on action
+                    value_obj = delta["value"]
+                    if "action" not in value_obj:
+                        logger.warning(f"Missing 'action' in value object: {value_obj}")
+                        continue
+
+                    if value_obj["action"] == 1:  # Update
+                        # Check if it has bytes (it's a string/bytes value)
+                        if "bytes" in value_obj:
+                            # Use the decode_base64_values function
+                            decoded_values = decode_base64_values([value_obj["bytes"]])
+                            decoded_value = decoded_values[0] if decoded_values else ""
+
+                            # Special handling for address
+                            if key == "address" and len(decoded_value) != len(
+                                base64.b64decode(value_obj["bytes"]).decode(
+                                    "utf-8", errors="ignore"
+                                )
+                            ):
+                                try:
+                                    addr_bytes = base64.b64decode(value_obj["bytes"])
+                                    if len(addr_bytes) == 32:
+                                        from algosdk import encoding
+
+                                        decoded_value = encoding.encode_address(
+                                            addr_bytes
+                                        )
+                                        logger.debug(
+                                            f"Decoded address: {decoded_value}"
+                                        )
+                                except Exception as e:
+                                    logger.warning(f"Failed to decode address: {e}")
+
+                            logger.debug(f"Decoded {key} value: {decoded_value}")
+                            current_global_state[key] = decoded_value
+                        # Check if it has uint (it's an integer value)
+                        elif "uint" in value_obj:
+                            uint_value = str(value_obj["uint"])
+                            logger.debug(f"Using uint value for {key}: {uint_value}")
+                            current_global_state[key] = uint_value
+                        else:
+                            logger.warning(
+                                f"Value object has neither bytes nor uint: {value_obj}"
+                            )
+                    elif value_obj["action"] == 2:  # Delete
+                        logger.debug(f"Deleting value for key {key}")
+                        current_global_state[key] = ""
                 except Exception as e:
                     logger.error(
-                        f"Error processing transaction {tx_idx} for CSV: {e}",
-                        exc_info=True,
+                        f"Error processing global state delta: {e}", exc_info=True
                     )
-                    # Continue with next transaction rather than failing completely
 
-        logger.info(
-            f"Successfully exported {len(transactions)} transactions to {output_path}"
-        )
-        return str(output_path)
-    except Exception as e:
-        logger.error(f"Error exporting transactions to CSV: {e}", exc_info=True)
-        return None
+        # Process local state delta
+        if "raw_tx" in tx and "local-state-delta" in tx["raw_tx"]:
+            logger.debug(
+                f"Transaction has local state delta with {len(tx['raw_tx']['local-state-delta'])} accounts"
+            )
+            try:
+                for account_delta in tx["raw_tx"]["local-state-delta"]:
+                    addr = account_delta["address"]
+                    logger.debug(f"Processing local state for address: {addr}")
+
+                    # Initialize local state for this address if not exists
+                    if addr not in current_local_states:
+                        logger.debug(f"Initializing local state for address: {addr}")
+                        current_local_states[addr] = {
+                            "book_hash": "",
+                            "research_hash": "",
+                            "params": "",
+                        }
+
+                    # Update local state based on deltas
+                    for delta in account_delta.get("delta", []):
+                        try:
+                            key_b64 = delta["key"]
+                            key = base64.b64decode(key_b64).decode("utf-8")
+
+                            logger.debug(f"Processing local state key: {key}")
+
+                            # Skip keys not in our tracking
+                            if key not in current_local_states[addr]:
+                                logger.debug(
+                                    f"Key {key} not in local state tracking for {addr}, skipping"
+                                )
+                                continue
+
+                            # Process value based on action
+                            value_obj = delta["value"]
+                            if "action" not in value_obj:
+                                logger.warning(
+                                    f"Missing 'action' in local value object: {value_obj}"
+                                )
+                                continue
+
+                            if value_obj["action"] == 1:  # Update
+                                # Check for bytes value
+                                if "bytes" in value_obj:
+                                    # Use the decode_base64_values function
+                                    decoded_values = decode_base64_values(
+                                        [value_obj["bytes"]]
+                                    )
+                                    decoded_value = (
+                                        decoded_values[0] if decoded_values else ""
+                                    )
+
+                                    logger.debug(
+                                        f"Decoded local {key} value: {decoded_value}"
+                                    )
+                                    current_local_states[addr][key] = decoded_value
+                                # Check for uint value
+                                elif "uint" in value_obj:
+                                    uint_value = str(value_obj["uint"])
+                                    logger.debug(
+                                        f"Using local uint value for {key}: {uint_value}"
+                                    )
+                                    current_local_states[addr][key] = uint_value
+                                else:
+                                    logger.warning(
+                                        f"Local value object has neither bytes nor uint: {value_obj}"
+                                    )
+                            elif value_obj["action"] == 2:  # Delete
+                                logger.debug(f"Deleting local value for key {key}")
+                                current_local_states[addr][key] = ""
+                        except Exception as e:
+                            logger.error(
+                                f"Error processing local state delta item: {e}",
+                                exc_info=True,
+                            )
+            except Exception as e:
+                logger.error(f"Error processing local state delta: {e}", exc_info=True)
+
+        # Handle OptIn and CloseOut cases from on_completion
+        on_completion = tx.get("on_completion")
+        sender = tx.get("sender")
+
+        if on_completion == "optin" and sender not in current_local_states:
+            logger.debug(f"OptIn operation for {sender}, initializing local state")
+            current_local_states[sender] = {
+                "book_hash": "NAN",
+                "research_hash": "NAN",
+                "params": "NAN",
+            }
+        elif on_completion == "closeout" and sender in current_local_states:
+            logger.debug(f"CloseOut operation for {sender}, clearing local state")
+            current_local_states[sender] = {
+                "book_hash": "",
+                "research_hash": "",
+                "params": "",
+            }
+
+        # Save the current state to the transaction
+        tx["tracked_state"] = {
+            "global_state": current_global_state.copy(),
+            "local_state": current_local_states.get(sender, {}).copy(),
+        }
+        logger.debug(f"Updated tracked state for transaction {tx.get('id', 'unknown')}")
+
+    logger.info(f"Completed state tracking for {len(transactions)} transactions")

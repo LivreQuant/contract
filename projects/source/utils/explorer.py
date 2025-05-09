@@ -4,11 +4,10 @@ import base64
 import logging
 import datetime
 import json
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Dict, Any, List, Optional
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from tabulate import tabulate
 
 from utils.algorand import (
     get_algod_client,

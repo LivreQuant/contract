@@ -24,7 +24,6 @@ from services.wallet_service import (
 )
 
 from algosdk import encoding, logic, transaction
-from algosdk.v2client import algod
 
 logger = logging.getLogger(__name__)
 

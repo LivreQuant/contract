@@ -4,7 +4,7 @@ import base64
 import logging
 import os
 from pathlib import Path
-from typing import Dict, Any, Tuple, Optional, Union
+from typing import Dict, Any, Tuple, Optional
 
 from algosdk import account, mnemonic, encoding, logic
 from algosdk.v2client import algod, indexer

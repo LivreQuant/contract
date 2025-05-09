@@ -1,8 +1,7 @@
 # services/wallet_service.py
 import json
 import logging
-from pathlib import Path
-from typing import Dict, Any, Tuple, Optional
+from typing import Dict, Any, Tuple
 
 import config
 from algosdk import account, mnemonic

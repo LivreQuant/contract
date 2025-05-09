@@ -4,7 +4,7 @@ import json
 import os
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Tuple
 
 from dotenv import load_dotenv
 from algosdk import account, mnemonic

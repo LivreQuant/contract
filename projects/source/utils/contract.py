@@ -3,7 +3,7 @@
 import json
 import time
 import logging
-from typing import Dict, Any, Tuple, List, Optional
+from typing import Dict, Any, Tuple
 
 import base64
 from pathlib import Path
@@ -18,7 +18,7 @@ from utils.algorand import (
     USER_MNEMONIC,
 )
 
-from algosdk import encoding, logic, transaction
+from algosdk import logic, transaction
 
 # Configure logging
 logger = logging.getLogger("contract_utils")

@@ -1,8 +1,6 @@
 # services/user_contract_service.py
 import logging
-from typing import Dict, Any, Optional, Tuple
 
-import config
 from utils.algorand import (
     get_algod_client,
     check_if_specific_user_opted_in,

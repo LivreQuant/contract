@@ -28,7 +28,6 @@ from services.user_contract_service import (
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
-    handlers=[logging.FileHandler("workflow.log"), logging.StreamHandler()],
 )
 logger = logging.getLogger("workflow_test")
 

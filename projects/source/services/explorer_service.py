@@ -753,3 +753,182 @@ def get_all_contracts() -> List[Dict[str, Any]]:
     contracts.sort(key=lambda x: x.get("creation_timestamp", 0), reverse=True)
 
     return contracts
+
+
+def export_transactions_to_csv(
+    explorer_info: Dict[str, Any], output_path: str = None
+) -> str:
+    """Export transactions from explorer info to CSV with complete data."""
+    transactions = explorer_info.get("transaction_history", [])
+    if not transactions:
+        print("No transactions to export")
+        return None
+
+    if not output_path:
+        user_id = explorer_info.get("user_id", "unknown")
+        book_id = explorer_info.get("book_id", "unknown")
+        output_path = (
+            config.DB_DIR / "explorer" / f"{user_id}_{book_id}_transactions.csv"
+        )
+
+    # Extract global state information
+    global_state = explorer_info.get("global_state", {})
+    global_user_id = global_state.get("user_id", "").replace("String: ", "")
+    global_book_id = global_state.get("book_id", "").replace("String: ", "")
+    global_address = global_state.get("address", "").replace("Address: ", "")
+    global_status = global_state.get("status", "").replace("String: ", "")
+    global_params = global_state.get("params", "").replace("String: ", "")
+
+    # Build participants mapping for local state lookups
+    participants_map = {}
+    for participant in explorer_info.get("participants", []):
+        address = participant.get("address")
+        if address and participant.get("opted_in") and participant.get("local_state"):
+            local_state = participant.get("local_state", {}).get("formatted", {})
+            participants_map[address] = local_state
+
+    with open(output_path, "w", newline="") as csvfile:
+        fieldnames = [
+            "transaction_id",
+            "date",
+            "sender",
+            "action",
+            "g_user_id",
+            "g_book_id",
+            "g_address",
+            "g_status",
+            "g_params",
+            "l_book_hash",
+            "l_research_hash",
+            "l_params",
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+
+        # Track current state for each transaction
+        current_global_state = {
+            "user_id": global_user_id,
+            "book_id": global_book_id,
+            "address": global_address,
+            "status": global_status,
+            "params": global_params,
+        }
+
+        # Track local state per address
+        local_states = {}
+
+        for tx in transactions:
+            tx_id = tx.get("id")
+            date = tx.get("date")
+            sender = tx.get("sender")
+            action = tx.get("on_completion", "noop")
+
+            # Process global state changes from this transaction
+            if "global_delta" in tx and tx["global_delta"]:
+                for key, value in tx["global_delta"].items():
+                    current_global_state[key] = value
+
+            # Process application arguments for specific methods
+            app_args = tx.get("app_args", [])
+            if app_args and len(app_args) >= 4:
+                # For initialize or update_global calls
+                if "initialize" in str(app_args[0]) or "update_global" in str(
+                    app_args[0]
+                ):
+                    for i, arg in enumerate(app_args[1:4], 1):
+                        if isinstance(arg, str) and arg.startswith("\x00"):
+                            if i == 1:  # user_id
+                                current_global_state["user_id"] = arg[2:]
+                            elif i == 2:  # book_id
+                                current_global_state["book_id"] = arg[2:]
+                            elif i == 4 or (
+                                i == 3 and "initialize" in str(app_args[0])
+                            ):  # params
+                                current_global_state["params"] = arg[2:]
+
+                # For update_local calls
+                if "update_local" in str(app_args[0]) and sender:
+                    if sender not in local_states:
+                        local_states[sender] = {
+                            "book_hash": "",
+                            "research_hash": "",
+                            "params": "",
+                        }
+
+                    if len(app_args) >= 4:
+                        if isinstance(app_args[1], str) and app_args[1].startswith(
+                            "\x00"
+                        ):
+                            local_states[sender]["book_hash"] = app_args[1][2:]
+                        if isinstance(app_args[2], str) and app_args[2].startswith(
+                            "\x00"
+                        ):
+                            local_states[sender]["research_hash"] = app_args[2][2:]
+                        if isinstance(app_args[3], str) and app_args[3].startswith(
+                            "\x00"
+                        ):
+                            local_states[sender]["params"] = app_args[3][2:]
+
+            # Process local state deltas
+            if (
+                "local_delta" in tx
+                and tx["local_delta"]
+                and sender in tx["local_delta"]
+            ):
+                sender_delta = tx["local_delta"][sender]
+                if sender not in local_states:
+                    local_states[sender] = {
+                        "book_hash": "",
+                        "research_hash": "",
+                        "params": "",
+                    }
+
+                for key, value in sender_delta.items():
+                    local_states[sender][key] = value
+
+            # Handle special cases for actions
+            if action == "optin" and sender:
+                # Initialize with NAN values on opt-in
+                local_states[sender] = {
+                    "book_hash": "NAN",
+                    "research_hash": "NAN",
+                    "params": "NAN",
+                }
+            elif action == "closeout" and sender:
+                # Clear values on close-out
+                if sender in local_states:
+                    local_states[sender] = {
+                        "book_hash": "",
+                        "research_hash": "",
+                        "params": "",
+                    }
+
+            # Get current local state for this sender
+            l_book_hash = ""
+            l_research_hash = ""
+            l_params = ""
+            if sender in local_states:
+                l_book_hash = local_states[sender].get("book_hash", "")
+                l_research_hash = local_states[sender].get("research_hash", "")
+                l_params = local_states[sender].get("params", "")
+
+            # Write the CSV row
+            writer.writerow(
+                {
+                    "transaction_id": tx_id,
+                    "date": date,
+                    "sender": sender,
+                    "action": action,
+                    "g_user_id": current_global_state.get("user_id", ""),
+                    "g_book_id": current_global_state.get("book_id", ""),
+                    "g_address": current_global_state.get("address", ""),
+                    "g_status": current_global_state.get("status", ""),
+                    "g_params": current_global_state.get("params", ""),
+                    "l_book_hash": l_book_hash,
+                    "l_research_hash": l_research_hash,
+                    "l_params": l_params,
+                }
+            )
+
+    logger.info(f"Exported {len(transactions)} transactions to {output_path}")
+    return str(output_path)

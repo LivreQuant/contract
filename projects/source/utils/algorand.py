@@ -494,23 +494,6 @@ def get_user_local_state(app_id: int, user_address: str) -> Dict[str, str]:
     return format_local_state(local_state)
 
 
-def get_admin_credentials():
-    """
-    Get admin wallet credentials, decrypting if necessary.
-
-    Returns:
-        Tuple of (private_key, address)
-    """
-    from utils.wallet import decrypt_admin_mnemonic, get_account_from_mnemonic
-
-    try:
-        admin_mnemonic = decrypt_admin_mnemonic()
-        return get_account_from_mnemonic(admin_mnemonic)
-    except Exception as e:
-        logger.error(f"Error getting admin credentials: {e}")
-        raise ValueError("Could not retrieve admin credentials")
-
-
 def get_latest_contract_id() -> int:
     """
     Get the latest contract ID from the most recent contract info file.

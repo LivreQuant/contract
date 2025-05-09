@@ -1,50 +1,282 @@
 {
   "user_id": "test_user_001",
   "book_id": "test_book_002",
-  "app_id": 1167,
-  "creation_timestamp": 1746814248.161957,
-  "exploration_timestamp": 1746814252.272521,
+  "app_id": 1177,
+  "creation_timestamp": 1746814820.968864,
+  "exploration_timestamp": 1746814825.4168663,
   "blockchain_status": "Deleted",
   "contract_info": {
-    "app_id": 1167,
-    "app_address": "YTPUNWEOK3NXGM7EV7JJJZVQHUXYRVUARUM32QFRWABTIDJ2ZFIZBY2LZU",
+    "app_id": 1177,
+    "app_address": "IB56JIRAFOZ3H5PSLP5HCOXQYGCXGMNJ5PIHIN63Q3DAEIR4RTZYNEAZCM",
     "user_id": "test_user_001",
     "user_address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
     "book_id": "test_book_002",
     "parameters": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
-    "creation_timestamp": 1746814248.161957,
+    "creation_timestamp": 1746814820.968864,
     "status": "ACTIVE",
     "blockchain_status": "Deleted",
-    "deletion_timestamp": 1746814253.7937982
+    "deletion_timestamp": 1746814828.807798
   },
   "global_state": {
-    "params": "String: region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
     "status": "String: ACTIVE",
     "address": "Address: RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
     "book_id": "String: test_book_002",
-    "user_id": "String: test_user_001"
+    "user_id": "String: test_user_001",
+    "params": "String: region:NA|asset_class:EQUITIES|instrument_class:STOCKS"
   },
-  "participants": [],
-  "transactions_csv_path": "/home/samaral/projects/algo/20250508/contract/projects/source/db/explorer/test_user_001_test_book_002_transactions.csv",
-  "detailed_transactions_csv_path": "/home/samaral/projects/algo/20250508/contract/projects/source/db/explorer/test_user_001_test_book_002_detailed_transactions.csv",
-  "transaction_count": 0,
-  "final_global_state": {
-    "address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
-    "book_id": "test_book_002",
-    "params": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
-    "status": "ACTIVE",
-    "user_id": "test_user_001"
-  },
-  "final_local_states": {},
-  "raw_global_state": [
+  "transaction_history": [
     {
-      "key": "cGFyYW1z",
-      "value": {
-        "bytes": "cmVnaW9uOk5BfGFzc2V0X2NsYXNzOkVRVUlUSUVTfGluc3RydW1lbnRfY2xhc3M6U1RPQ0tT",
-        "type": 1,
-        "uint": 0
+      "id": "SMDZNYQ3GJXIBEOEXOWNXPX7CW72VAH232NA4OQ5JDY5CGNM27YA",
+      "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
+      "timestamp": 1746677355,
+      "date": "2025-05-08 04:09:15",
+      "round": 177,
+      "app_args": [],
+      "on_completion": "noop",
+      "global_delta": {},
+      "local_delta": {},
+      "accounts": [],
+      "raw_tx": {
+        "application-transaction": {
+          "accounts": [],
+          "application-args": [],
+          "application-id": 0,
+          "approval-program": "CiACAQAmCgQVH3x1BnBhcmFtcwZzdGF0dXMHYWRkcmVzcwNOQU4JYm9va19oYXNoDXJlc2VhcmNoX2hhc2gHdXNlcl9pZAdib29rX2lkBkFDVElWRTEbQQD4ggcEIyX5rwSHibzbBKvnnB8EivZ/UAT6mKvfBKHYG9MEIL719zYaAI4HAJ0AiwB4AE8AOAAVAAIjQzEZgQUSRDEYRIgB/hYoTFCwIkMxGRREMRhENhoBVwIANhoCVwIANhoDVwIAiAGGFihMULAiQzEZFEQxGEQ2GgFXAgCIAWAWKExQsCJDMRkURDEYRDYaAVcCADYaAlcCADYaAxfAHDYaBFcCAIgA5hYoTFCwIkMxGYECEkQxGESIALUWKExQsCJDMRkiEkQxGESIAH0WKExQsCJDMRkURDEYRDYaAVcCADYaAlcCADYaA1cCAIgAEhYoTFCwIkMxGUD/OzEYFEQiQ4oDAScHi/1nJwiL/mcrgCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGcpi/9nKoANSU5BQ1RJVkUtSU5JVGciiTEAIytlRBJEIyplRCcJEkQxACcFJwRmMQAnBicEZjEAKScEZiKJMQAjK2VEEkQxACcFJwRmMQAnBicEZjEAKScEZiKJigQBMQAyCRJEIycHZUSL/BNAAB8jJwhlRIv9E0AAFCMrZUSL/hNAAAojKWVEi/8TQQAaIkQnB4v8ZycIi/1nK4v+ZymL/2cqJwlnIokjQv/jigEBMQAyCRJEKov/ZyKJigMBMQAjK2VEEkQjKmVEJwkSRDEAIycFY0SL/RNAABkxACMnBmNEi/4TQAAMMQAjKWNEi/8TQQAYIkQxACcFi/1mMQAnBov+ZjEAKYv/ZiKJI0L/5TEAMgkSRCMqZUSADUlOQUNUSVZFLVNUT1ASQAAXIyplRIANSU5BQ1RJVkUtU09MRBJBAAQiRCKJI0L/+Q==",
+          "clear-state-program": "CoEBQw==",
+          "foreign-apps": [],
+          "foreign-assets": [],
+          "global-state-schema": {
+            "num-byte-slice": 5,
+            "num-uint": 0
+          },
+          "local-state-schema": {
+            "num-byte-slice": 3,
+            "num-uint": 0
+          },
+          "on-completion": "noop"
+        },
+        "close-rewards": 0,
+        "closing-amount": 0,
+        "confirmed-round": 177,
+        "created-application-index": 1177,
+        "fee": 1000,
+        "first-valid": 176,
+        "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
+        "genesis-id": "dockernet-v1",
+        "id": "SMDZNYQ3GJXIBEOEXOWNXPX7CW72VAH232NA4OQ5JDY5CGNM27YA",
+        "intra-round-offset": 0,
+        "last-valid": 1176,
+        "receiver-rewards": 0,
+        "round-time": 1746677355,
+        "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
+        "sender-rewards": 0,
+        "signature": {
+          "sig": "H6Sw7eARLLSFbF9LCBstOKcbImkJGOpA74yoC6d7V8hll4FSqb9cAPnyOYVYXpjcJb9F0riF8O6vl0qgp57xCA=="
+        },
+        "tx-type": "appl"
       }
     },
+    {
+      "id": "IWTBOSW4LF52ALTKQTGMP2DFXP4OQTEF42PUAD4KTMBSTR65WHEA",
+      "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
+      "timestamp": 1746677405,
+      "date": "2025-05-08 04:10:05",
+      "round": 179,
+      "app_args": [
+        "2325f9af...",
+        "\u0000\rtest_user_001",
+        "\u0000\rtest_book_002",
+        "\u00006region:NA|asset_class:EQUITIES|instrument_class:STOCKS"
+      ],
+      "on_completion": "noop",
+      "global_delta": {
+        "address": "0",
+        "book_id": "0",
+        "params": "0",
+        "status": "0",
+        "user_id": "0"
+      },
+      "local_delta": {},
+      "accounts": [],
+      "raw_tx": {
+        "application-transaction": {
+          "accounts": [],
+          "application-args": [
+            "IyX5rw==",
+            "AA10ZXN0X3VzZXJfMDAx",
+            "AA10ZXN0X2Jvb2tfMDAy",
+            "ADZyZWdpb246TkF8YXNzZXRfY2xhc3M6RVFVSVRJRVN8aW5zdHJ1bWVudF9jbGFzczpTVE9DS1M="
+          ],
+          "application-id": 1177,
+          "foreign-apps": [],
+          "foreign-assets": [],
+          "global-state-schema": {
+            "num-byte-slice": 0,
+            "num-uint": 0
+          },
+          "local-state-schema": {
+            "num-byte-slice": 0,
+            "num-uint": 0
+          },
+          "on-completion": "noop"
+        },
+        "close-rewards": 0,
+        "closing-amount": 0,
+        "confirmed-round": 179,
+        "fee": 1000,
+        "first-valid": 178,
+        "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
+        "genesis-id": "dockernet-v1",
+        "global-state-delta": [
+          {
+            "key": "YWRkcmVzcw==",
+            "value": {
+              "action": 1,
+              "bytes": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+              "uint": 0
+            }
+          },
+          {
+            "key": "Ym9va19pZA==",
+            "value": {
+              "action": 1,
+              "bytes": "dGVzdF9ib29rXzAwMg==",
+              "uint": 0
+            }
+          },
+          {
+            "key": "cGFyYW1z",
+            "value": {
+              "action": 1,
+              "bytes": "cmVnaW9uOk5BfGFzc2V0X2NsYXNzOkVRVUlUSUVTfGluc3RydW1lbnRfY2xhc3M6U1RPQ0tT",
+              "uint": 0
+            }
+          },
+          {
+            "key": "c3RhdHVz",
+            "value": {
+              "action": 1,
+              "bytes": "SU5BQ1RJVkUtSU5JVA==",
+              "uint": 0
+            }
+          },
+          {
+            "key": "dXNlcl9pZA==",
+            "value": {
+              "action": 1,
+              "bytes": "dGVzdF91c2VyXzAwMQ==",
+              "uint": 0
+            }
+          }
+        ],
+        "id": "IWTBOSW4LF52ALTKQTGMP2DFXP4OQTEF42PUAD4KTMBSTR65WHEA",
+        "intra-round-offset": 0,
+        "last-valid": 1178,
+        "logs": [
+          "FR98dQAAAAAAAAAB"
+        ],
+        "receiver-rewards": 0,
+        "round-time": 1746677405,
+        "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
+        "sender-rewards": 0,
+        "signature": {
+          "sig": "DOUqSvJlttlLWP+2+M658iVMDUeLCEoWME7LRQkvYLrCZgjh446rvam8w6Ltdxd7i5SLRYrasmiR9tczet0/Cg=="
+        },
+        "tx-type": "appl"
+      }
+    },
+    {
+      "id": "42VLZ6A5Y7V5CD4HREN2LHERYBNZ4QTPRPDEMLKVJ7MZK35I2Y6A",
+      "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
+      "timestamp": 1746677430,
+      "date": "2025-05-08 04:10:30",
+      "round": 180,
+      "app_args": [
+        "8af67f50...",
+        "\u0000\rtest_user_001",
+        "\u0000\rtest_book_002",
+        "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001",
+        "\u00006region:NA|asset_class:EQUITIES|instrument_class:STOCKS"
+      ],
+      "on_completion": "noop",
+      "global_delta": {
+        "address": "0",
+        "status": "0"
+      },
+      "local_delta": {},
+      "accounts": [
+        "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI"
+      ],
+      "raw_tx": {
+        "application-transaction": {
+          "accounts": [
+            "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI"
+          ],
+          "application-args": [
+            "ivZ/UA==",
+            "AA10ZXN0X3VzZXJfMDAx",
+            "AA10ZXN0X2Jvb2tfMDAy",
+            "AAAAAAAAAAE=",
+            "ADZyZWdpb246TkF8YXNzZXRfY2xhc3M6RVFVSVRJRVN8aW5zdHJ1bWVudF9jbGFzczpTVE9DS1M="
+          ],
+          "application-id": 1177,
+          "foreign-apps": [],
+          "foreign-assets": [],
+          "global-state-schema": {
+            "num-byte-slice": 0,
+            "num-uint": 0
+          },
+          "local-state-schema": {
+            "num-byte-slice": 0,
+            "num-uint": 0
+          },
+          "on-completion": "noop"
+        },
+        "close-rewards": 0,
+        "closing-amount": 0,
+        "confirmed-round": 180,
+        "fee": 1000,
+        "first-valid": 179,
+        "genesis-hash": "DP1/XA+4rNFcdBwpANunoTvf3PbTLIOHwDtPd54Ayw8=",
+        "genesis-id": "dockernet-v1",
+        "global-state-delta": [
+          {
+            "key": "YWRkcmVzcw==",
+            "value": {
+              "action": 1,
+              "bytes": "igykfZv38HzDLVP7nb0g/Sk26leGzvj+JPGCrOkAqT0=",
+              "uint": 0
+            }
+          },
+          {
+            "key": "c3RhdHVz",
+            "value": {
+              "action": 1,
+              "bytes": "QUNUSVZF",
+              "uint": 0
+            }
+          }
+        ],
+        "id": "42VLZ6A5Y7V5CD4HREN2LHERYBNZ4QTPRPDEMLKVJ7MZK35I2Y6A",
+        "intra-round-offset": 0,
+        "last-valid": 1179,
+        "logs": [
+          "FR98dQAAAAAAAAAB"
+        ],
+        "receiver-rewards": 0,
+        "round-time": 1746677430,
+        "sender": "NAR4UUIY45ORXLBSZPX4R75TZ6BGG323PIXRJXERCXEX7MX3RI3P4D5D7Q",
+        "sender-rewards": 0,
+        "signature": {
+          "sig": "3NxxNdHqlrAzNcRUfolXvtfyBtDoN6Vdml5F9VhBN3GCn1xjcFjtXmQ/7jmNb5EsU0NBNWedp20IVlTcZcPsDQ=="
+        },
+        "tx-type": "appl"
+      }
+    }
+  ],
+  "participants": [],
+  "csv_export_path": "/home/samaral/projects/algo/20250508/contract/projects/source/db/explorer/test_user_001_test_book_002_transactions.csv",
+  "raw_global_state": [
     {
       "key": "c3RhdHVz",
       "value": {
@@ -76,8 +308,15 @@
         "type": 1,
         "uint": 0
       }
+    },
+    {
+      "key": "cGFyYW1z",
+      "value": {
+        "bytes": "cmVnaW9uOk5BfGFzc2V0X2NsYXNzOkVRVUlUSUVTfGluc3RydW1lbnRfY2xhc3M6U1RPQ0tT",
+        "type": 1,
+        "uint": 0
+      }
     }
   ],
-  "participants_error": "Indexer client does not support search_accounts method",
-  "deletion_timestamp": 1746814253.7944908
+  "deletion_timestamp": 1746814828.809024
 }

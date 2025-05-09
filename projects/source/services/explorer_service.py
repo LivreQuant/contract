@@ -216,7 +216,11 @@ def enhance_transactions_with_state(transactions: List[Dict[str, Any]]) -> None:
 
 
 def explore_contract(
-    user_id: str, book_id: str, include_csv: bool = True, force: bool = False
+    user_id: str,
+    book_id: str,
+    app_id: str,
+    include_csv: bool = True,
+    force: bool = False,
 ) -> Dict[str, Any]:
     """
     Explore a contract and store detailed information.
@@ -224,6 +228,7 @@ def explore_contract(
     Args:
         user_id: User identifier
         book_id: Book identifier
+        app_id: App identifier
         include_csv: Whether to generate CSV exports
         force: Whether to force a fresh exploration even if data already exists
 
@@ -231,25 +236,19 @@ def explore_contract(
         Dictionary with detailed contract information
     """
     # Look for the contract in the contracts directory
-    contract_path = config.CONTRACTS_DIR / f"{user_id}_{book_id}_contract.json"
+    contract_path = config.CONTRACTS_DIR / f"{user_id}_{book_id}_{app_id}_contract.json"
 
     if not contract_path.exists():
-        logger.error(f"No contract found for user {user_id} and book {book_id}")
+        logger.error(
+            f"No contract found for user {user_id} and book {book_id} and app {app_id}"
+        )
         return {}
 
     # Load the contract info
     with open(contract_path, "r") as f:
         contract_info = json.load(f)
 
-    app_id = contract_info.get("app_id")
-    if not app_id:
-        logger.error(
-            f"Invalid contract info for user {user_id} and book {book_id}: missing app_id"
-        )
-        return {}
-
     # Define both standard and app-specific paths
-    standard_explorer_path = EXPLORER_DIR / f"{user_id}_{book_id}_explorer.json"
     app_specific_explorer_path = (
         EXPLORER_DIR / f"{user_id}_{book_id}_{app_id}_explorer.json"
     )
@@ -406,7 +405,6 @@ def explore_contract(
         # Export transactions to CSV if requested
         if include_csv and transactions:
             # Define both standard and app-specific CSV paths
-            standard_csv_path = EXPLORER_DIR / f"{user_id}_{book_id}_transactions.csv"
             app_specific_csv_path = (
                 EXPLORER_DIR / f"{user_id}_{book_id}_{app_id}_transactions.csv"
             )
@@ -415,7 +413,7 @@ def explore_contract(
             enhance_transactions_with_state(transactions)
 
             # Export to both paths
-            for csv_path in [standard_csv_path, app_specific_csv_path]:
+            for csv_path in [app_specific_csv_path]:
                 with open(csv_path, "w", newline="") as csvfile:
                     # Use new columns based on state fields
                     fieldnames = [
@@ -583,29 +581,8 @@ def explore_contract(
                     ]
             except Exception as e:
                 logger.error(f"Error retrieving previous explorer data: {e}")
-        elif standard_explorer_path.exists():
-            try:
-                with open(standard_explorer_path, "r") as f:
-                    previous_data = json.load(f)
-
-                # Preserve global state from previous exploration
-                if previous_data.get("global_state"):
-                    explorer_info["global_state"] = previous_data["global_state"]
-                    explorer_info["preserved_global_state_note"] = (
-                        "Retrieved from previous exploration before deletion"
-                    )
-
-                if previous_data.get("raw_global_state"):
-                    explorer_info["raw_global_state"] = previous_data[
-                        "raw_global_state"
-                    ]
-            except Exception as e:
-                logger.error(f"Error retrieving previous explorer data: {e}")
 
     # Save the explorer info to both paths
-    with open(standard_explorer_path, "w") as f:
-        json.dump(explorer_info, f, indent=2)
-
     with open(app_specific_explorer_path, "w") as f:
         json.dump(explorer_info, f, indent=2)
 
@@ -767,8 +744,11 @@ def export_transactions_to_csv(
     if not output_path:
         user_id = explorer_info.get("user_id", "unknown")
         book_id = explorer_info.get("book_id", "unknown")
+        app_id = explorer_info.get("app_id", "unknown")
         output_path = (
-            config.DB_DIR / "explorer" / f"{user_id}_{book_id}_transactions.csv"
+            config.DB_DIR
+            / "explorer"
+            / f"{user_id}_{book_id}_{app_id}_transactions.csv"
         )
 
     # Extract global state information

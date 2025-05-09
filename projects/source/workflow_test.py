@@ -181,21 +181,24 @@ def run_full_workflow(
     logger.info(f"Waited {wait_seconds} seconds. Now exploring contract...")
 
     try:
-        from services.explorer_service import explore_contract
+        from services.explorer_service import (
+            explore_contract,
+            export_transactions_to_csv,
+        )
 
-        explorer_info = explore_contract(user_id, book_id, include_csv=True, force=True)
+        # First get the JSON data without CSV generation
+        explorer_info = explore_contract(
+            user_id, book_id, app_id, include_csv=True, force=True
+        )
+
         if explorer_info:
             logger.info(
                 f"Contract exploration complete, information saved to db/explorer/{user_id}_{book_id}_explorer.json"
             )
-            if "csv_export_path" in explorer_info:
-                logger.info(
-                    f"Transaction history exported to {explorer_info['csv_export_path']}"
-                )
 
-                # Check if any transactions were found
-                tx_count = len(explorer_info.get("transaction_history", []))
-                logger.info(f"Found {tx_count} transactions in the explorer")
+            # Check if any transactions were found
+            tx_count = len(explorer_info.get("transaction_history", []))
+            logger.info(f"Found {tx_count} transactions in the explorer")
         else:
             logger.error("Contract exploration failed")
     except Exception as e:

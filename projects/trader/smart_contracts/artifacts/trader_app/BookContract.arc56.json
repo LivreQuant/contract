@@ -237,7 +237,9 @@
             "global": {},
             "local": {},
             "box": {}
-        }
+        },
+        "global": {},
+        "local": {}
     },
     "bareActions": {
         "create": [
@@ -435,5 +437,198 @@
         }
     },
     "events": [],
-    "templateVariables": {}
+    "templateVariables": {},
+    "schema": {
+        "global": {
+            "num_byte_slices": 5,
+            "num_uints": 0
+        },
+        "local": {
+            "num_byte_slices": 3,
+            "num_uints": 0
+        }
+    },
+    "contract": {
+        "name": "BookContract",
+        "methods": [
+            {
+                "name": "initialize",
+                "args": [
+                    {
+                        "type": "byte[]",
+                        "name": "user_id"
+                    },
+                    {
+                        "type": "byte[]",
+                        "name": "book_id"
+                    },
+                    {
+                        "type": "byte[]",
+                        "name": "parameters"
+                    }
+                ],
+                "returns": {
+                    "type": "uint64"
+                },
+                "actions": {
+                    "create": [],
+                    "call": [
+                        "NoOp"
+                    ]
+                },
+                "readonly": false,
+                "desc": "Initialize the contract with required parameters.",
+                "events": [],
+                "recommendations": {}
+            },
+            {
+                "name": "opt_in",
+                "args": [],
+                "returns": {
+                    "type": "uint64"
+                },
+                "actions": {
+                    "create": [],
+                    "call": [
+                        "OptIn"
+                    ]
+                },
+                "readonly": false,
+                "desc": "Handle user opt-in to the contract.",
+                "events": [],
+                "recommendations": {}
+            },
+            {
+                "name": "close_out",
+                "args": [],
+                "returns": {
+                    "type": "uint64"
+                },
+                "actions": {
+                    "create": [],
+                    "call": [
+                        "CloseOut"
+                    ]
+                },
+                "readonly": false,
+                "desc": "Handle user closing out from the contract.",
+                "events": [],
+                "recommendations": {}
+            },
+            {
+                "name": "update_global",
+                "args": [
+                    {
+                        "type": "byte[]",
+                        "name": "new_user_id"
+                    },
+                    {
+                        "type": "byte[]",
+                        "name": "new_book_id"
+                    },
+                    {
+                        "type": "account",
+                        "name": "new_address"
+                    },
+                    {
+                        "type": "byte[]",
+                        "name": "new_params"
+                    }
+                ],
+                "returns": {
+                    "type": "uint64"
+                },
+                "actions": {
+                    "create": [],
+                    "call": [
+                        "NoOp"
+                    ]
+                },
+                "readonly": false,
+                "desc": "Update the global parameters of the contract.",
+                "events": [],
+                "recommendations": {}
+            },
+            {
+                "name": "update_status",
+                "args": [
+                    {
+                        "type": "string",
+                        "name": "new_status"
+                    }
+                ],
+                "returns": {
+                    "type": "uint64"
+                },
+                "actions": {
+                    "create": [],
+                    "call": [
+                        "NoOp"
+                    ]
+                },
+                "readonly": false,
+                "desc": "Update the status of the contract.",
+                "events": [],
+                "recommendations": {}
+            },
+            {
+                "name": "update_local",
+                "args": [
+                    {
+                        "type": "byte[]",
+                        "name": "book_hash"
+                    },
+                    {
+                        "type": "byte[]",
+                        "name": "research_hash"
+                    },
+                    {
+                        "type": "byte[]",
+                        "name": "params"
+                    }
+                ],
+                "returns": {
+                    "type": "uint64"
+                },
+                "actions": {
+                    "create": [],
+                    "call": [
+                        "NoOp"
+                    ]
+                },
+                "readonly": false,
+                "desc": "Update the local state for the user.",
+                "events": [],
+                "recommendations": {}
+            },
+            {
+                "name": "delete_application",
+                "args": [],
+                "returns": {
+                    "type": "uint64"
+                },
+                "actions": {
+                    "create": [],
+                    "call": [
+                        "DeleteApplication"
+                    ]
+                },
+                "readonly": false,
+                "desc": "Delete the contract if it's inactive.",
+                "events": [],
+                "recommendations": {}
+            }
+        ],
+        "desc": "Contract BookContract",
+        "networks": {}
+    },
+    "hints": {
+        "initialize(byte[],byte[],byte[])uint64": {},
+        "opt_in()uint64": {},
+        "close_out()uint64": {},
+        "update_global(byte[],byte[],account,byte[])uint64": {},
+        "update_status(string)uint64": {},
+        "update_local(byte[],byte[],byte[])uint64": {},
+        "delete_application()uint64": {}
+    }
 }

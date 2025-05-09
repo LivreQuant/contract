@@ -1,5 +1,6 @@
 import dataclasses
 import importlib
+import json
 import logging
 import subprocess
 import sys
@@ -86,6 +87,98 @@ def _get_output_path(output_dir: Path, deployment_extension: str) -> Path:
     )
 
 
+def ensure_schema_compatibility(arc56_path):
+    """
+    Ensures the ARC56 JSON file has all the structure expected by the client generator.
+    """
+    with open(arc56_path, "r") as f:
+        arc56_data = json.load(f)
+
+    modified = False
+
+    # Fix schema field
+    if (
+        "schema" not in arc56_data
+        and "state" in arc56_data
+        and "schema" in arc56_data["state"]
+    ):
+        arc56_data["schema"] = {
+            "global": {
+                "num_byte_slices": arc56_data["state"]["schema"]["global"]["bytes"],
+                "num_uints": arc56_data["state"]["schema"]["global"]["ints"],
+            },
+            "local": {
+                "num_byte_slices": arc56_data["state"]["schema"]["local"]["bytes"],
+                "num_uints": arc56_data["state"]["schema"]["local"]["ints"],
+            },
+        }
+        modified = True
+        logger.info(f"Fixed schema format in {arc56_path}")
+
+    # Fix state structure
+    if (
+        "state" in arc56_data
+        and "global" not in arc56_data["state"]
+        and "schema" in arc56_data["state"]
+    ):
+        # Add empty state.global and state.local mappings
+        arc56_data["state"]["global"] = {}
+        arc56_data["state"]["local"] = {}
+        modified = True
+        logger.info(f"Added state.global and state.local mappings in {arc56_path}")
+
+    # Add contract field if missing
+    if "contract" not in arc56_data:
+        contract_name = arc56_path.stem.split(".")[
+            0
+        ]  # Get contract name from file name
+        arc56_data["contract"] = {
+            "name": contract_name,
+            "methods": [],
+            "desc": f"Contract {contract_name}",
+            "networks": {},
+        }
+
+        # If there are methods in the ARC56 JSON, copy them to the contract field
+        if "methods" in arc56_data:
+            arc56_data["contract"]["methods"] = arc56_data["methods"]
+
+        modified = True
+        logger.info(f"Added contract field in {arc56_path}")
+
+    # Ensure we have methods
+    methods = arc56_data.get("methods", [])
+    if (
+        "methods" not in arc56_data
+        and "contract" in arc56_data
+        and "methods" in arc56_data["contract"]
+    ):
+        methods = arc56_data["contract"]["methods"]
+
+    # Add hints field with entries for each method
+    arc56_data["hints"] = {}
+    for method in methods:
+        # Generate method signature
+        method_name = method.get("name", "")
+        args_types = ",".join([arg.get("type", "") for arg in method.get("args", [])])
+        return_type = method.get("returns", {}).get("type", "void")
+        signature = f"{method_name}({args_types}){return_type}"
+
+        # Add empty hints for this method
+        arc56_data["hints"][signature] = {}
+
+    modified = True
+    logger.info(f"Added method hints in {arc56_path}")
+
+    # Log current structure after modifications for debugging
+    logger.debug(f"ARC56 JSON state structure: {arc56_data.get('state', {}).keys()}")
+
+    # Save if modified
+    if modified:
+        with open(arc56_path, "w") as f:
+            json.dump(arc56_data, f, indent=4)
+
+
 def build(output_dir: Path, contract_path: Path) -> Path:
     """
     Builds the contract by exporting (compiling) its source and generating a client.
@@ -130,6 +223,10 @@ def build(output_dir: Path, contract_path: Path) -> Path:
         for file_name in app_spec_file_names:
             client_file = file_name
             print(file_name)
+
+            # Add this line to fix the schema before generating the client
+            ensure_schema_compatibility(output_dir / file_name)
+
             generate_result = subprocess.run(
                 [
                     "algokit",

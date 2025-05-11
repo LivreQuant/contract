@@ -1,13 +1,12 @@
 {
-  "app_id": 1348,
-  "app_address": "LVMHFT27FVKVCJN3DK6MIFQGQXO2CPVBJG2ZD3LH3SEQKY7ZOTGXP7ZHZA",
+  "app_id": 1358,
+  "app_address": "7IWBKI7LUO7IO5ISAXH5EZFJAP4B5L5LYTQO2FMKVED6AFN3OEYRPLC4EU",
   "user_id": "test_user_001",
   "user_address": "RIGKI7M367YHZQZNKP5Z3PJA7UUTN2SXQ3HPR7RE6GBKZ2IAVE6TCFHPRI",
   "book_id": "test_book_002",
   "parameters": "region:NA|asset_class:EQUITIES|instrument_class:STOCKS",
-  "creation_timestamp": 1746823987.7854958,
+  "creation_timestamp": 1746931921.3599942,
   "status": "ACTIVE",
   "blockchain_status": "Deleted",
-  "deletion_timestamp": 1746824051.2926683,
-  "deletion_note": "Contract no longer exists on blockchain"
+  "deletion_timestamp": 1746932122.1355286
 }

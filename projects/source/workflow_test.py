@@ -117,37 +117,98 @@ def run_full_workflow(
     if interactive:
         input("Press Enter to continue to Step 5: Update local state...")
 
-    # Step 5: Update local state
-    logger.info("STEP 5: Update local state")
+    # Step 5: Update local state with only book hash
+    logger.info("STEP 5: Update local state with book hash only")
     step5_start = time.time()
-    book_hash = f"book_hash_{user_id}_{book_id}"
-    research_hash = f"research_hash_{user_id}_{book_id}"
-    local_params = f"param1:value1|param2:value2|user:{user_id}|book:{book_id}"
 
-    if update_user_local_state(
-        user_id, book_id, book_hash, research_hash, local_params
-    ):
-        logger.info("Local state update successful")
+    # Import and initialize the file integrity service
+    from services.file_integrity_service import FileIntegrityService
+
+    file_service = FileIntegrityService()
+
+    # Define path to your book file
+    book_file = Path("files/market_stream_20250505T195600.csv")
+
+    # Check if file exists
+    if book_file.exists():
+        # Update contract with book file hash only (no research file, no params)
+        success = file_service.update_contract_with_file_hashes(
+            user_id=user_id,
+            book_id=book_id,
+            book_file_path=book_file,
+            store_files=True,  # Store a copy of the file
+        )
+
+        if success:
+            logger.info("Local state update with book hash successful")
+        else:
+            logger.error("Local state update with book hash failed")
     else:
-        logger.error("Local state update failed, continuing workflow")
+        # Fallback to dummy values if files don't exist
+        logger.warning("Book file not found, using dummy hash")
+        book_hash = f"book_hash_{user_id}_{book_id}"
+
+        if update_user_local_state(user_id, book_id, book_hash, "", ""):
+            logger.info("Local state update with dummy book hash successful")
+        else:
+            logger.error("Local state update with dummy book hash failed")
+
     logger.info(f"Step 5 completed in {time.time() - step5_start:.2f} seconds")
 
     if interactive:
-        input("Press Enter to continue to Step 6: Update local state again...")
+        input(
+            "Press Enter to continue to Step 6: Update local state with book and research hash..."
+        )
 
-    # Step 6: Update local state again with different values
-    logger.info("STEP 6: Update local state again")
+    # Step 6: Update local state with both book and research hash
+    logger.info("STEP 6: Update local state with book and research hash")
     step6_start = time.time()
-    book_hash = f"book_hash_{user_id}_{book_id}_updated"
-    research_hash = f"research_hash_{user_id}_{book_id}_updated"
-    local_params = f"param1:new_value1|param2:new_value2|user:{user_id}|book:{book_id}|timestamp:{time.time()}"
 
-    if update_user_local_state(
-        user_id, book_id, book_hash, research_hash, local_params
-    ):
-        logger.info("Second local state update successful")
+    # Define paths to both files
+    second_book_file = Path("files/market_stream_20250505T195600_update.csv")
+    research_file = Path("files/factsheet.jpg")
+
+    # Check if files exist
+    if second_book_file.exists():
+        # Update contract with book file hash and optional research file
+        success = file_service.update_contract_with_file_hashes(
+            user_id=user_id,
+            book_id=book_id,
+            book_file_path=second_book_file,
+            research_file_path=research_file if research_file.exists() else None,
+            additional_params={"version": "2.0", "description": "Updated submission"},
+            store_files=True,
+        )
+
+        if success:
+            if research_file.exists():
+                logger.info(
+                    "Second local state update with book and research hash successful"
+                )
+            else:
+                logger.info(
+                    "Second local state update with book hash successful (no research file)"
+                )
+        else:
+            logger.error("Second local state update failed")
     else:
-        logger.error("Second local state update failed, continuing workflow")
+        # Fallback to dummy values if files don't exist
+        logger.warning("Second book file not found, using dummy hashes")
+        book_hash = f"book_hash_{user_id}_{book_id}_updated"
+        research_hash = (
+            f"research_hash_{user_id}_{book_id}_updated"
+            if research_file.exists()
+            else ""
+        )
+        local_params = f"param1:new_value1|param2:new_value2|user:{user_id}|book:{book_id}|timestamp:{time.time()}"
+
+        if update_user_local_state(
+            user_id, book_id, book_hash, research_hash, local_params
+        ):
+            logger.info("Second local state update with dummy values successful")
+        else:
+            logger.error("Second local state update with dummy values failed")
+
     logger.info(f"Step 6 completed in {time.time() - step6_start:.2f} seconds")
 
     if interactive:

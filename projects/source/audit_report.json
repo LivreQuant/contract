@@ -1,43 +1,29 @@
 {
-  "audit_date": "2025-05-12 19:43:00",
-  "csv_file": "db/explorer/test_user_001_test_book_002_1517_transactions.csv",
+  "audit_date": "2025-05-12 20:54:30",
+  "csv_file": "db/explorer/test_user_001_test_book_002_1527_transactions.csv",
   "transaction_count": 7,
-  "public_key_path": "/home/samaral/projects/algo/20250508/contract/projects/source/secure/keys/default_public_key.pem",
   "file_verifications": [
     {
-      "verified": false,
       "file": "market_stream_20250505T195600.csv",
-      "hash_match": false,
-      "signature_valid": true,
-      "signature_hash_match": true,
-      "timestamp": 1747078957.0537817
+      "file_type": "book",
+      "calculated_hash": "e0fc15fce7824bc74a21a50b45d884e7d457fe3a6750d1e18cb1396b398f7a0b",
+      "blockchain_match": false,
+      "verified": false
     },
     {
-      "verified": true,
       "file": "market_stream_20250505T195600_update.csv",
-      "hash_match": true,
-      "signature_valid": true,
-      "signature_hash_match": true,
-      "timestamp": 1747078957.0537817
+      "file_type": "book",
+      "calculated_hash": "b35cc517a041a9a766ff233a82a4dd21a84811b701384481633208e821888c9b",
+      "blockchain_match": false,
+      "verified": false
     },
     {
-      "verified": true,
       "file": "factsheet.jpg",
-      "hash_match": true,
-      "signature_valid": true,
-      "signature_hash_match": true,
-      "timestamp": 1747078957.0537817
+      "file_type": "research",
+      "calculated_hash": "1610c823756e51bd8020a453dfd6c0259d95be36113672be9f9a374830899e49",
+      "blockchain_match": false,
+      "verified": false
     }
   ],
-  "params_verification": {
-    "verified": true,
-    "params_str": "book:test_book_002|book_file:market_stream_20250505T195600_update.csv|description:Updated submission|research_file:factsheet.jpg|user:test_user_001|version:2.0",
-    "original_params_str": "book:test_book_002|book_file:market_stream_20250505T195600_update.csv|description:Updated submission|research_file:factsheet.jpg|user:test_user_001|version:2.0",
-    "params_match": true,
-    "param_keys_match": false,
-    "signature_valid": true,
-    "signature_hash_match": true,
-    "timestamp": 1747078957.0537817
-  },
   "all_verified": false
 }

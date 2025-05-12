@@ -4,6 +4,7 @@ import argparse
 import time
 import json
 from pathlib import Path
+import hashlib  # Added for direct hash verification
 
 # Import our config module
 import config
@@ -21,6 +22,7 @@ from services.user_contract_service import (
     update_user_local_state,
     user_close_out_from_contract,
 )
+from services.file_integrity_service import FileIntegrityService
 
 # Configure logging
 logging.basicConfig(
@@ -41,6 +43,42 @@ def wait_for_prompt(message):
 
     # Now show the prompt
     return input(f"\n{message}\n")
+
+
+def calculate_file_hash(file_path):
+    """Calculate SHA-256 hash of a file for debugging."""
+    hash_obj = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_obj.update(chunk)
+    return hash_obj.hexdigest()
+
+
+def save_debug_info(file_path, hash_value, metadata_path=None):
+    """Save debugging information about a file."""
+    debug_info = {
+        "file_path": str(file_path),
+        "file_name": file_path.name,
+        "file_size": file_path.stat().st_size,
+        "hash_value": hash_value,
+        "timestamp": time.time(),
+    }
+
+    # If metadata path is provided, include that information
+    if metadata_path and Path(metadata_path).exists():
+        try:
+            with open(metadata_path, "r") as f:
+                metadata = json.load(f)
+            debug_info["metadata"] = metadata
+        except Exception as e:
+            debug_info["metadata_error"] = str(e)
+
+    # Save to debug file
+    debug_path = Path(f"file_debug_{file_path.name}.json")
+    with open(debug_path, "w") as f:
+        json.dump(debug_info, f, indent=2)
+
+    logger.info(f"Debug information saved to {debug_path}")
 
 
 def run_full_workflow(
@@ -141,9 +179,7 @@ def run_full_workflow(
     logger.info("STEP 5: Update local state with book hash only")
     step5_start = time.time()
 
-    # Import and initialize the file integrity service
-    from services.file_integrity_service import FileIntegrityService
-
+    # Initialize the file integrity service
     file_service = FileIntegrityService()
 
     # Define path to your book file
@@ -151,9 +187,18 @@ def run_full_workflow(
 
     # Check if file exists
     if book_file.exists():
+        # Calculate and log hash for debugging
+        file_hash = calculate_file_hash(book_file)
+        logger.info(f"WORKFLOW DEBUG - Book file hash: {file_hash}")
+        logger.info(
+            f"WORKFLOW DEBUG - Book file size: {book_file.stat().st_size} bytes"
+        )
+
         # Choose the appropriate update method based on use_encrypt flag
         if use_encrypt:
             # Use secure cryptographic signing
+            logger.info("Using secure cryptographic signing for book file")
+
             success = file_service.update_contract_with_signed_hashes(
                 user_id=user_id,
                 book_id=book_id,
@@ -163,13 +208,39 @@ def run_full_workflow(
                     config.SECRET_PASS_PHRASE if config.ENCRYPT_PRIVATE_KEYS else None
                 ),  # Pass passphrase if key is encrypted
             )
+
+            # Find the most recent metadata file
+            metadata_dir = Path("verification_metadata")
+            if metadata_dir.exists():
+                metadata_files = list(metadata_dir.glob(f"{user_id}_{book_id}_*.json"))
+                if metadata_files:
+                    latest_metadata = sorted(
+                        metadata_files, key=lambda f: f.stat().st_mtime
+                    )[-1]
+                    logger.info(
+                        f"WORKFLOW DEBUG - Latest metadata file: {latest_metadata}"
+                    )
+
+                    # Save debug info with metadata
+                    save_debug_info(book_file, file_hash, latest_metadata)
+                else:
+                    logger.warning("No metadata files found")
+                    save_debug_info(book_file, file_hash)
+            else:
+                logger.warning("Metadata directory not found")
+                save_debug_info(book_file, file_hash)
         else:
             # Update contract with book file hash only (no research file, no params)
+            logger.info("Using regular hash for book file")
+
             success = file_service.update_contract_with_file_hashes(
                 user_id=user_id,
                 book_id=book_id,
                 book_file_path=book_file,
             )
+
+            # Save debug info
+            save_debug_info(book_file, file_hash)
 
         if success:
             logger.info("Local state update with book hash successful")
@@ -192,6 +263,8 @@ def run_full_workflow(
             "Press Enter to continue to Step 6: Update local state with book and research hash..."
         )
 
+    # Rest of function continues unchanged...
+
     # Step 6: Update local state with both book and research hash
     logger.info("STEP 6: Update local state with book and research hash")
     step6_start = time.time()
@@ -202,6 +275,20 @@ def run_full_workflow(
 
     # Check if files exist
     if second_book_file.exists():
+        # Calculate and log hash for debugging
+        second_file_hash = calculate_file_hash(second_book_file)
+        logger.info(f"WORKFLOW DEBUG - Second book file hash: {second_file_hash}")
+        logger.info(
+            f"WORKFLOW DEBUG - Second book file size: {second_book_file.stat().st_size} bytes"
+        )
+
+        if research_file.exists():
+            research_file_hash = calculate_file_hash(research_file)
+            logger.info(f"WORKFLOW DEBUG - Research file hash: {research_file_hash}")
+            logger.info(
+                f"WORKFLOW DEBUG - Research file size: {research_file.stat().st_size} bytes"
+            )
+
         # Choose the appropriate update method based on use_encrypt flag
         if use_encrypt:
             # Use secure cryptographic signing
@@ -219,6 +306,25 @@ def run_full_workflow(
                     config.SECRET_PASS_PHRASE if config.ENCRYPT_PRIVATE_KEYS else None
                 ),
             )
+
+            # Find the most recent metadata file
+            metadata_dir = Path("verification_metadata")
+            if metadata_dir.exists():
+                metadata_files = list(metadata_dir.glob(f"{user_id}_{book_id}_*.json"))
+                if metadata_files:
+                    latest_metadata = sorted(
+                        metadata_files, key=lambda f: f.stat().st_mtime
+                    )[-1]
+                    logger.info(
+                        f"WORKFLOW DEBUG - Latest metadata file for second update: {latest_metadata}"
+                    )
+
+                    # Save debug info with metadata
+                    save_debug_info(second_book_file, second_file_hash, latest_metadata)
+                    if research_file.exists():
+                        save_debug_info(
+                            research_file, research_file_hash, latest_metadata
+                        )
         else:
             # Update contract with book file hash and optional research file
             success = file_service.update_contract_with_file_hashes(
@@ -231,6 +337,11 @@ def run_full_workflow(
                     "description": "Updated submission",
                 },
             )
+
+            # Save debug info
+            save_debug_info(second_book_file, second_file_hash)
+            if research_file.exists():
+                save_debug_info(research_file, research_file_hash)
 
         if success:
             if research_file.exists():
@@ -262,6 +373,9 @@ def run_full_workflow(
             logger.error("Second local state update with dummy values failed")
 
     logger.info(f"Step 6 completed in {time.time() - step6_start:.2f} seconds")
+
+    # Continue with the rest of the steps as before...
+    # Steps 7-9 remain unchanged
 
     if interactive:
         wait_for_prompt(
@@ -299,15 +413,23 @@ def run_full_workflow(
             explore_contract,
         )
 
-        # First get the JSON data without CSV generation
+        # Generate explorer data and CSV
         explorer_info = explore_contract(
             user_id, book_id, app_id, include_csv=True, force=True
         )
 
         if explorer_info:
-            logger.info(
-                f"Contract exploration complete, information saved to db/explorer/{user_id}_{book_id}_{app_id}_explorer.json"
+            # Get the CSV path for the transaction history
+            csv_path = (
+                Path("db/explorer") / f"{user_id}_{book_id}_{app_id}_transactions.csv"
             )
+
+            if csv_path.exists():
+                logger.info(f"Transaction history saved to {csv_path}")
+                logger.info(f"To audit these files later, run:")
+                logger.info(f"python audit_test.py")
+            else:
+                logger.warning(f"CSV file not generated at expected path: {csv_path}")
 
             # Check if any transactions were found
             tx_count = len(explorer_info.get("transaction_history", []))
@@ -317,94 +439,6 @@ def run_full_workflow(
     except Exception as e:
         logger.error(f"Error exploring contract: {e}")
     logger.info(f"Step 8 completed in {time.time() - step8_start:.2f} seconds")
-
-    # Step 8.5: Verify files using the secure audit service if crypto was used
-    if use_encrypt:
-        logger.info("STEP 8.5: Verify files using secure cryptographic verification")
-        step85_start = time.time()
-
-        try:
-            # Initialize the CSV path
-            csv_path = (
-                Path("db")
-                / "explorer"
-                / f"{user_id}_{book_id}_{app_id}_transactions.csv"
-            )
-            if not csv_path.exists():
-                logger.warning(
-                    f"CSV file not found at {csv_path}, checking for alternative paths"
-                )
-                # Try to find any CSV for this app_id
-                csv_files = list(Path("db/explorer").glob(f"*_{app_id}_*.csv"))
-                if csv_files:
-                    csv_path = csv_files[0]
-                    logger.info(f"Using alternative CSV file: {csv_path}")
-                else:
-                    logger.error("No transaction CSV files found for verification")
-                    raise FileNotFoundError("No transaction CSV files found")
-
-            # Import the secure verification service
-            from services.audit_verification_service import AuditVerificationService
-
-            # Initialize the service
-            service = AuditVerificationService(csv_path)
-
-            # Files to verify
-            files_to_verify = []
-            if book_file.exists():
-                files_to_verify.append({"path": str(book_file), "type": "book"})
-
-            if second_book_file.exists():
-                files_to_verify.append({"path": str(second_book_file), "type": "book"})
-
-            if research_file.exists():
-                files_to_verify.append({"path": str(research_file), "type": "research"})
-
-            # Parameters for verification
-            params_dict = {
-                "book_file": second_book_file.name,
-                "user": user_id,
-                "book": book_id,
-                "version": "2.0",
-                "description": "Updated submission",
-            }
-
-            if research_file.exists():
-                params_dict["research_file"] = research_file.name
-
-            # Perform the secure verification
-            public_key_path = Path(config.PUBLIC_KEY_PATH)
-            csv_path = (
-                Path("db/explorer") / f"{user_id}_{book_id}_{app_id}_transactions.csv"
-            )
-            report = file_service.generate_secure_audit_report(
-                files_to_verify=files_to_verify,
-                params_dict=params_dict,
-                public_key_path=public_key_path,
-                csv_path=csv_path,
-            )
-
-            # Print the report
-            file_service.print_secure_audit_report(report)
-
-            # Save the report
-            report_path = Path("audit_report.json")
-            with open(report_path, "w") as f:
-                json.dump(report, f, indent=2)
-
-            logger.info(f"Secure audit report saved to {report_path}")
-            logger.info(
-                f"Step 8.5 completed in {time.time() - step85_start:.2f} seconds"
-            )
-
-        except Exception as e:
-            logger.error(f"Error performing secure verification: {e}")
-            import traceback
-
-            traceback.print_exc()
-
-    if interactive:
-        input("Press Enter to continue to Step 9: Delete contract...")
 
     if interactive:
         wait_for_prompt("Press Enter to continue to Step 9: Delete contract...")

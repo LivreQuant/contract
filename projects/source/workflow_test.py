@@ -32,6 +32,19 @@ logging.basicConfig(
 logger = logging.getLogger("workflow_test")
 
 
+def wait_for_prompt(message):
+    """Wait a moment for logs to flush, then display a prompt."""
+    # Give time for any pending logs to be processed
+    time.sleep(0.5)
+
+    # Force flush of all log handlers
+    for handler in logging.getLogger().handlers:
+        handler.flush()
+
+    # Now show the prompt
+    return input(f"\n{message}\n")
+
+
 def run_full_workflow(
     user_id: str, book_id: str, funding_amount: float = 1.0, interactive: bool = True
 ):
@@ -58,7 +71,9 @@ def run_full_workflow(
     logger.info(f"Step 1 completed in {time.time() - step1_start:.2f} seconds")
 
     if interactive:
-        input("Press Enter to continue to Step 2: Ensure user wallet is funded...")
+        wait_for_prompt(
+            "Press Enter to continue to Step 2: Ensure user wallet is funded..."
+        )
 
     # Step 2: Ensure user wallet is funded
     logger.info("STEP 2: Ensure user wallet is funded")
@@ -79,7 +94,7 @@ def run_full_workflow(
     logger.info(f"Step 2 completed in {time.time() - step2_start:.2f} seconds")
 
     if interactive:
-        input(
+        wait_for_prompt(
             "Press Enter to continue to Step 3: Deploy contract or get existing contract..."
         )
 
@@ -102,7 +117,7 @@ def run_full_workflow(
     logger.info(f"Step 3 completed in {time.time() - step3_start:.2f} seconds")
 
     if interactive:
-        input("Press Enter to continue to Step 4: User opt-in to contract...")
+        wait_for_prompt("Press Enter to continue to Step 4: User opt-in to contract...")
 
     # Step 4: User opt-in to contract
     logger.info("STEP 4: User opt-in to contract")
@@ -115,7 +130,7 @@ def run_full_workflow(
     logger.info(f"Step 4 completed in {time.time() - step4_start:.2f} seconds")
 
     if interactive:
-        input("Press Enter to continue to Step 5: Update local state...")
+        wait_for_prompt("Press Enter to continue to Step 5: Update local state...")
 
     # Step 5: Update local state with only book hash
     logger.info("STEP 5: Update local state with book hash only")
@@ -156,7 +171,7 @@ def run_full_workflow(
     logger.info(f"Step 5 completed in {time.time() - step5_start:.2f} seconds")
 
     if interactive:
-        input(
+        wait_for_prompt(
             "Press Enter to continue to Step 6: Update local state with book and research hash..."
         )
 
@@ -212,7 +227,9 @@ def run_full_workflow(
     logger.info(f"Step 6 completed in {time.time() - step6_start:.2f} seconds")
 
     if interactive:
-        input("Press Enter to continue to Step 7: User closes out from contract...")
+        wait_for_prompt(
+            "Press Enter to continue to Step 7: User closes out from contract..."
+        )
 
     # Step 7: User closes out from contract
     logger.info("STEP 7: User closes out from contract")
@@ -226,7 +243,7 @@ def run_full_workflow(
     logger.info(f"Step 7 completed in {time.time() - step7_start:.2f} seconds")
 
     if interactive:
-        input("Press Enter to continue to Step 8: Explore contract...")
+        wait_for_prompt("Press Enter to continue to Step 8: Explore contract...")
 
     # Step 8: Explore contract and save detailed information
     logger.info("STEP 8: Explore contract and save detailed information")
@@ -265,7 +282,7 @@ def run_full_workflow(
     logger.info(f"Step 8 completed in {time.time() - step8_start:.2f} seconds")
 
     if interactive:
-        input("Press Enter to continue to Step 9: Delete contract...")
+        wait_for_prompt("Press Enter to continue to Step 9: Delete contract...")
 
     # Step 9: Admin deletes contract
     logger.info("STEP 9: Admin deletes contract")

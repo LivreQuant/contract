@@ -72,6 +72,20 @@ class FileIntegrityService:
 
         return dest_path
 
+    def hash_params_string(self, params_str: str) -> str:
+        """
+        Create a hash of the parameters string.
+
+        Args:
+            params_str: The full parameters string
+
+        Returns:
+            Hash of the parameters string
+        """
+        import hashlib
+
+        return hashlib.sha256(params_str.encode()).hexdigest()
+
     def calculate_and_store_hashes(
         self,
         user_id: str,
@@ -124,6 +138,9 @@ class FileIntegrityService:
         if store_files:
             # Store book file
             book_stored_path = self.store_file(book_file_path, user_id, book_id, "book")
+            result["book_stored_path"] = (
+                book_stored_path  # Add this line to store the path
+            )
 
             # Store research file if provided
             research_stored_path = None
@@ -131,30 +148,9 @@ class FileIntegrityService:
                 research_stored_path = self.store_file(
                     research_file_path, user_id, book_id, "research"
                 )
-
-            # Save metadata
-            metadata = {
-                "user_id": user_id,
-                "book_id": book_id,
-                "timestamp": time.time(),
-                "book_file": {
-                    "path": str(book_stored_path),
-                    "hash": book_hash,
-                    "original_filename": Path(book_file_path).name,
-                },
-            }
-
-            # Add research file metadata if available
-            if research_stored_path:
-                metadata["research_file"] = {
-                    "path": str(research_stored_path),
-                    "hash": research_hash,
-                    "original_filename": Path(research_file_path).name,
-                }
-
-            metadata_path = STORAGE_ROOT / f"{user_id}_{book_id}_metadata.json"
-            with open(metadata_path, "w") as f:
-                json.dump(metadata, f, indent=2)
+                result["research_stored_path"] = (
+                    research_stored_path  # Add this line to store the path
+                )
 
         return result
 
@@ -169,17 +165,6 @@ class FileIntegrityService:
     ) -> bool:
         """
         Update the smart contract with file hashes.
-
-        Args:
-            user_id: User identifier
-            book_id: Book identifier
-            book_file_path: Path to the book data file (required)
-            research_file_path: Path to the research file (optional)
-            additional_params: Additional parameters to include in the params string (optional)
-            store_files: Whether to store copies of the files
-
-        Returns:
-            True if successful, False otherwise
         """
         try:
             # Calculate hashes
@@ -192,28 +177,67 @@ class FileIntegrityService:
                 "research_hash", ""
             )  # Empty string if not provided
 
-            # Create a parameter string with file metadata (optional)
-            params_str = ""
-            if additional_params or store_files:
-                params_dict = {
-                    "book_file": Path(book_file_path).name,
-                    "user": user_id,
-                    "book": book_id,
-                    "timestamp": str(time.time()),
+            # Create a parameter string with file metadata
+            params_dict = {
+                "book_file": Path(book_file_path).name,
+                "user": user_id,
+                "book": book_id,
+                # No timestamp included here
+            }
+
+            # Add research file if provided
+            if research_file_path and research_hash:
+                params_dict["research_file"] = Path(research_file_path).name
+
+            # Add any additional parameters
+            if additional_params:
+                params_dict.update(additional_params)
+
+            # Convert to string format - sort by key for consistency
+            full_params_str = "|".join(
+                [f"{k}:{v}" for k, v in sorted(params_dict.items())]
+            )
+
+            # Generate a hash of the parameters string
+            params_hash = self.hash_params_string(full_params_str)
+
+            # Use just the hash directly as the params string
+            params_str = params_hash
+
+            # Store the full parameters metadata
+            if store_files:
+                # Include current timestamp only in metadata, not in the hashed parameters
+                metadata = {
+                    "user_id": user_id,
+                    "book_id": book_id,
+                    "timestamp": time.time(),  # For metadata only
+                    "params_hash": params_hash,
+                    "full_params": params_dict,
+                    "full_params_str": full_params_str,
+                    "book_file": {
+                        "path": str(hashes.get("book_stored_path", "")),
+                        "hash": book_hash,
+                        "original_filename": Path(book_file_path).name,
+                    },
                 }
 
-                # Add research file if provided
+                # Add research file metadata if available
                 if research_file_path and research_hash:
-                    params_dict["research_file"] = Path(research_file_path).name
+                    metadata["research_file"] = {
+                        "path": str(hashes.get("research_stored_path", "")),
+                        "hash": research_hash,
+                        "original_filename": Path(research_file_path).name,
+                    }
 
-                # Add any additional parameters
-                if additional_params:
-                    params_dict.update(additional_params)
+                metadata_path = (
+                    STORAGE_ROOT / f"{user_id}_{book_id}_{params_hash}_metadata.json"
+                )
+                with open(metadata_path, "w") as f:
+                    json.dump(metadata, f, indent=2)
 
-                # Convert to string format
-                params_str = "|".join([f"{k}:{v}" for k, v in params_dict.items()])
+                logger.info(f"Stored full params metadata in {metadata_path}")
 
-            # Update the contract's local state
+            # Update the contract's local state with hash values
             result = update_user_local_state(
                 user_id, book_id, book_hash, research_hash, params_str
             )
@@ -303,6 +327,77 @@ class FileIntegrityService:
             logger.error(f"Error verifying file: {e}")
             return False
 
+    # Add this new method
+    def verify_params(
+        self,
+        user_id: str,
+        book_id: str,
+        params_dict: Dict[str, str],
+        params_hash: str = None,
+    ) -> bool:
+        """
+        Verify if a parameters dictionary matches a hash stored on the blockchain.
+
+        Args:
+            user_id: User identifier
+            book_id: Book identifier
+            params_dict: Dictionary of parameters to verify
+            params_hash: Optional known hash to verify against (otherwise retrieved from blockchain)
+
+        Returns:
+            True if the parameters match, False otherwise
+        """
+        try:
+            # Convert dict to string format
+            params_str = "|".join([f"{k}:{v}" for k, v in sorted(params_dict.items())])
+
+            # Generate hash from provided params
+            calculated_hash = self.hash_params_string(params_str)
+
+            # If no hash provided, get from blockchain
+            if not params_hash:
+                # Get contract info
+                from services.contract_service import get_contract_for_user_book
+
+                contract_info = get_contract_for_user_book(user_id, book_id)
+                if not contract_info:
+                    logger.error(
+                        f"No contract found for user {user_id} and book {book_id}"
+                    )
+                    return False
+
+                app_id = contract_info["app_id"]
+                user_address = contract_info["user_address"]
+
+                # Get the local state
+                from utils.algorand import get_user_local_state
+
+                local_state = get_user_local_state(app_id, user_address)
+
+                # Get the stored params string
+                stored_params = local_state.get("params", "").replace("String: ", "")
+
+                params_hash = stored_params
+
+            # Compare hashes
+            match = calculated_hash == params_hash
+
+            if match:
+                logger.info(
+                    f"Parameters verified successfully against hash {params_hash}"
+                )
+            else:
+                logger.warning(
+                    f"Parameters do NOT match the stored hash.\n"
+                    f"Stored hash: {params_hash}\n"
+                    f"Calculated hash: {calculated_hash}"
+                )
+
+            return match
+        except Exception as e:
+            logger.error(f"Error verifying parameters: {e}")
+            return False
+
     def get_file_history(self, user_id: str, book_id: str) -> List[Dict[str, Any]]:
         """
         Get the history of file hashes for a user/book from the blockchain transactions.
@@ -354,8 +449,36 @@ class FileIntegrityService:
                             record["research_hash"] = local_state.get("research_hash")
 
                         # Add params if exists
+
                         if "params" in local_state and local_state.get("params"):
-                            record["params"] = local_state.get("params")
+                            params_str = local_state.get("params")
+                            record["params"] = params_str
+
+                            # Assume the params is directly the hash
+                            params_hash = params_str
+                            record["params_hash"] = params_hash
+
+                            # Check if we can find the full params metadata
+                            metadata_paths = list(
+                                STORAGE_ROOT.glob(
+                                    f"{user_id}_{book_id}_{params_hash}_metadata.json"
+                                )
+                            )
+                            if metadata_paths:
+                                try:
+                                    with open(metadata_paths[0], "r") as f:
+                                        metadata = json.load(f)
+                                    record["full_params"] = metadata.get(
+                                        "full_params", {}
+                                    )
+                                    record["params_decoded"] = True
+                                except Exception as e:
+                                    logger.warning(
+                                        f"Error loading params metadata: {e}"
+                                    )
+                                    record["params_decoded"] = False
+                            else:
+                                record["params_decoded"] = False
 
                         history.append(record)
 

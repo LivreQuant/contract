@@ -10,6 +10,10 @@ __pycache__/
 /wallets
 *.wallet.json
 
+# Storage
+/projects/source/storage
+/projects/source/db
+
 # Distribution / packaging
 .Python
 build/

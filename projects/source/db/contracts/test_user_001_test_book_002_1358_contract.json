@@ -8,5 +8,6 @@
   "creation_timestamp": 1746931921.3599942,
   "status": "ACTIVE",
   "blockchain_status": "Deleted",
-  "deletion_timestamp": 1746932122.1355286
+  "deletion_timestamp": 1746932122.1355286,
+  "deletion_note": "Contract no longer exists on blockchain"
 }

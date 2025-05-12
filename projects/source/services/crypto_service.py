@@ -184,3 +184,27 @@ def verify_signature(
         return True
     except Exception:
         return False
+
+
+def sign_hash_deterministic(hash_value: str, secret_passphrase: str) -> str:
+    """
+    Create a deterministic signature using HMAC with the secret passphrase.
+
+    Args:
+        hash_value: The hash to sign
+        secret_passphrase: Secret passphrase
+
+    Returns:
+        Deterministic signature as a hex string
+    """
+    import hmac
+    import hashlib
+
+    # Use HMAC with the passphrase as the key - this is deterministic
+    signature = hmac.new(
+        key=secret_passphrase.encode(),
+        msg=hash_value.encode(),
+        digestmod=hashlib.sha256,
+    ).hexdigest()
+
+    return signature

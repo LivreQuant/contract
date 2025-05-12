@@ -4,9 +4,8 @@ import argparse
 import time
 import json
 from pathlib import Path
-import hashlib  # Added for direct hash verification
+import hashlib
 
-# Import our config module
 import config
 from services.wallet_service import (
     get_or_create_user_wallet,
@@ -54,7 +53,7 @@ def calculate_file_hash(file_path):
     return hash_obj.hexdigest()
 
 
-def save_debug_info(file_path, hash_value, metadata_path=None):
+def save_debug_info(file_path, hash_value):
     """Save debugging information about a file."""
     debug_info = {
         "file_path": str(file_path),
@@ -63,15 +62,6 @@ def save_debug_info(file_path, hash_value, metadata_path=None):
         "hash_value": hash_value,
         "timestamp": time.time(),
     }
-
-    # If metadata path is provided, include that information
-    if metadata_path and Path(metadata_path).exists():
-        try:
-            with open(metadata_path, "r") as f:
-                metadata = json.load(f)
-            debug_info["metadata"] = metadata
-        except Exception as e:
-            debug_info["metadata_error"] = str(e)
 
     # Save to debug file
     debug_path = Path(f"file_debug_{file_path.name}.json")
@@ -209,26 +199,6 @@ def run_full_workflow(
                 ),  # Pass passphrase if key is encrypted
             )
 
-            # Find the most recent metadata file
-            metadata_dir = Path("verification_metadata")
-            if metadata_dir.exists():
-                metadata_files = list(metadata_dir.glob(f"{user_id}_{book_id}_*.json"))
-                if metadata_files:
-                    latest_metadata = sorted(
-                        metadata_files, key=lambda f: f.stat().st_mtime
-                    )[-1]
-                    logger.info(
-                        f"WORKFLOW DEBUG - Latest metadata file: {latest_metadata}"
-                    )
-
-                    # Save debug info with metadata
-                    save_debug_info(book_file, file_hash, latest_metadata)
-                else:
-                    logger.warning("No metadata files found")
-                    save_debug_info(book_file, file_hash)
-            else:
-                logger.warning("Metadata directory not found")
-                save_debug_info(book_file, file_hash)
         else:
             # Update contract with book file hash only (no research file, no params)
             logger.info("Using regular hash for book file")
@@ -307,24 +277,6 @@ def run_full_workflow(
                 ),
             )
 
-            # Find the most recent metadata file
-            metadata_dir = Path("verification_metadata")
-            if metadata_dir.exists():
-                metadata_files = list(metadata_dir.glob(f"{user_id}_{book_id}_*.json"))
-                if metadata_files:
-                    latest_metadata = sorted(
-                        metadata_files, key=lambda f: f.stat().st_mtime
-                    )[-1]
-                    logger.info(
-                        f"WORKFLOW DEBUG - Latest metadata file for second update: {latest_metadata}"
-                    )
-
-                    # Save debug info with metadata
-                    save_debug_info(second_book_file, second_file_hash, latest_metadata)
-                    if research_file.exists():
-                        save_debug_info(
-                            research_file, research_file_hash, latest_metadata
-                        )
         else:
             # Update contract with book file hash and optional research file
             success = file_service.update_contract_with_file_hashes(

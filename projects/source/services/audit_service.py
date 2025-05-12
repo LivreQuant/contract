@@ -1,11 +1,12 @@
-# services/audit_service.py
+# Modified audit_service.py - No metadata dependency
 import logging
 import json
+import hashlib
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Union
 
 from utils.hash_file_utils import calculate_file_hash
-from services.crypto_service import verify_signature
+from services.crypto_service import verify_signature, sign_hash, load_private_key
 
 logger = logging.getLogger(__name__)
 
@@ -37,158 +38,69 @@ class AuditService:
         # Sort by key and join with the format key:value|key:value...
         return "|".join([f"{k}:{v}" for k, v in sorted(params_copy.items())])
 
-    def _compare_params_strings(self, params_str1: str, params_str2: str) -> bool:
-        """
-        Compare two parameter strings for exact equality.
-
-        Args:
-            params_str1: First parameter string
-            params_str2: Second parameter string
-
-        Returns:
-            True if strings match exactly
-        """
-        return params_str1 == params_str2
-
-    def _compare_param_keys(self, params_str1: str, params_str2: str) -> bool:
-        """
-        Compare two parameter strings for key equality (regardless of order).
-
-        Args:
-            params_str1: First parameter string
-            params_str2: Second parameter string
-
-        Returns:
-            True if both strings contain the same key-value pairs (ignoring order)
-        """
-        try:
-            # Parse parameter strings into dictionaries
-            def parse_params(params_str):
-                params_dict = {}
-                for param in params_str.split("|"):
-                    if ":" in param:
-                        key, value = param.split(":", 1)
-                        params_dict[key] = value
-                return params_dict
-
-            dict1 = parse_params(params_str1)
-            dict2 = parse_params(params_str2)
-
-            # Check if all essential keys match (ignore timestamps, etc.)
-            essential_keys = ["user", "book", "book_file"]
-
-            for key in essential_keys:
-                if key in dict1 and key in dict2:
-                    if dict1[key] != dict2[key]:
-                        return False
-                elif key in dict1 or key in dict2:
-                    # One has the key but not the other
-                    return False
-
-            return True
-        except Exception:
-            return False
-
-    def verify_signed_file(
+    def verify_file_against_blockchain(
         self,
         file_path: Union[str, Path],
         file_type: str,
-        public_key_path: Union[str, Path],
-        metadata_path: Optional[Union[str, Path]] = None,
+        passphrase: str,  # Just need the passphrase, not private key
+        blockchain_hashes: Dict[str, List[str]],
     ) -> Dict[str, Any]:
         """
-        Verify a file against previously stored cryptographic metadata.
+        Verify a file against blockchain hashes using deterministic signing.
 
         Args:
             file_path: Path to the file to verify
             file_type: Type of file ('book' or 'research')
-            public_key_path: Path to the public key for verification
-            metadata_path: Optional path to a specific metadata file
+            passphrase: The secret passphrase for signing
+            blockchain_hashes: Dictionary containing hashes from blockchain
 
         Returns:
             Verification result dictionary
         """
         try:
-            import json
-            import hashlib
+            # Convert path to Path object if string
+            file_path = Path(file_path)
 
             # Calculate current file hash
-            file_path = Path(file_path)
             current_hash = calculate_file_hash(file_path)
-
             logger.info(f"VERIFICATION TRACE - File: {file_path.name}")
             logger.info(f"VERIFICATION TRACE - Current File Hash: {current_hash}")
 
-            # Find verification metadata (we created this during the signature process)
-            if metadata_path is None:
-                # Find the most recent metadata for this user/book
-                metadata_dir = Path("verification_metadata")
-                if not metadata_dir.exists():
-                    raise FileNotFoundError("Verification metadata directory not found")
+            # Sign the hash deterministically using the passphrase
+            from services.crypto_service import sign_hash_deterministic
 
-                # Find metadata files for this user/book
-                metadata_files = list(metadata_dir.glob(f"*_*_*.json"))
-                if not metadata_files:
-                    raise FileNotFoundError(
-                        f"No metadata files found in {metadata_dir}"
-                    )
+            signed_hash = sign_hash_deterministic(current_hash, passphrase)
+            logger.info(f"VERIFICATION TRACE - Deterministic Signature: {signed_hash}")
 
-                # Use the most recent file
-                metadata_path = sorted(metadata_files, key=lambda f: f.stat().st_mtime)[
-                    -1
-                ]
-                logger.info(f"Using metadata file: {metadata_path}")
+            # Hash the signature to get what should be on the blockchain
+            signature_hash = hashlib.sha256(signed_hash.encode()).hexdigest()
+            logger.info(
+                f"VERIFICATION TRACE - Signature Hash (for blockchain): {signature_hash}"
+            )
 
-            # Load the metadata
-            with open(metadata_path, "r") as f:
-                metadata = json.load(f)
+            # Determine which hash collection to check
+            hash_list = (
+                blockchain_hashes["book_hash"]
+                if file_type.lower() == "book"
+                else blockchain_hashes["research_hash"]
+            )
+            logger.info(
+                f"VERIFICATION TRACE - Available blockchain hashes: {hash_list}"
+            )
 
-            # Determine which key to use (book_file or research_file)
-            file_key = "book_file" if file_type.lower() == "book" else "research_file"
-            if file_key not in metadata:
-                raise ValueError(f"No {file_type} metadata found in {metadata_path}")
-
-            # Get the stored data
-            file_data = metadata[file_key]
-            original_hash = file_data["original_hash"]
-            signature = file_data["signature"]
-            signature_hash = file_data["signature_hash"]
-
-            # Verify hash match
-            hash_match = current_hash == original_hash
-            logger.info(f"VERIFICATION TRACE - Original Hash: {original_hash}")
+            # Check if our signature hash exists in the blockchain data
+            hash_match = signature_hash in hash_list
             logger.info(f"VERIFICATION TRACE - Hash Match: {hash_match}")
 
-            # Load the public key and verify the signature
-            with open(public_key_path, "rb") as f:
-                public_key_pem = f.read()
-
-            # Verify the original signature with the public key
-            sig_valid = verify_signature(original_hash, signature, public_key_pem)
-            logger.info(f"VERIFICATION TRACE - Signature Valid: {sig_valid}")
-
-            # Calculate hash of signature to compare with blockchain
-            calculated_sig_hash = hashlib.sha256(signature.encode()).hexdigest()
-            logger.info(
-                f"VERIFICATION TRACE - Calculated Signature Hash: {calculated_sig_hash}"
-            )
-            logger.info(f"VERIFICATION TRACE - Stored Signature Hash: {signature_hash}")
-            logger.info(
-                f"VERIFICATION TRACE - Signature Hash Match: {calculated_sig_hash == signature_hash}"
-            )
-
-            # Everything matches - file has not been tampered with and was signed by the private key
-            verified = (
-                hash_match and sig_valid and (calculated_sig_hash == signature_hash)
-            )
-
+            # Return verification result
             return {
-                "verified": verified,
+                "verified": hash_match,
                 "file": file_path.name,
-                "hash_match": hash_match,
-                "signature_valid": sig_valid,
-                "signature_hash_match": calculated_sig_hash == signature_hash,
-                "timestamp": metadata.get("timestamp"),
+                "file_type": file_type,
+                "original_hash": current_hash,
+                "deterministic_signature": signed_hash,
+                "signature_hash": signature_hash,
+                "blockchain_match": hash_match,
             }
 
         except Exception as e:
@@ -196,126 +108,60 @@ class AuditService:
             import traceback
 
             traceback.print_exc()
-            return {"verified": False, "error": str(e)}
+            return {"verified": False, "file": Path(file_path).name, "error": str(e)}
 
-    def verify_signed_params(
+    def verify_params_against_blockchain(
         self,
         params_dict: Dict[str, Any],
-        public_key_path: Union[str, Path],
-        metadata_path: Optional[Union[str, Path]] = None,
+        passphrase: str,  # Just use passphrase like we do with files
+        blockchain_hashes: Dict[str, List[str]],
     ) -> Dict[str, Any]:
         """
-        Verify parameters against previously stored cryptographic metadata.
+        Verify parameters against blockchain records using deterministic signing.
 
         Args:
             params_dict: Dictionary of parameters to verify
-            public_key_path: Path to the public key for verification
-            metadata_path: Optional path to a specific metadata file
+            passphrase: The secret passphrase for signing
+            blockchain_hashes: Dictionary containing hashes from blockchain
 
         Returns:
             Verification result dictionary
         """
         try:
-            import json
-            import hashlib
-
-            # Format parameters to get the standardized string
+            # Format parameters to standardized string
             params_str = self.format_params_dict(params_dict)
-
             logger.info(f"VERIFICATION TRACE - Parameters String: {params_str}")
 
-            # Find verification metadata
-            if metadata_path is None:
-                # Find the most recent metadata for this user/book
-                metadata_dir = Path("verification_metadata")
-                if not metadata_dir.exists():
-                    raise FileNotFoundError("Verification metadata directory not found")
+            # Sign the parameters deterministically using the passphrase
+            from services.crypto_service import sign_hash_deterministic
 
-                # List all metadata files
-                metadata_files = list(metadata_dir.glob(f"*.json"))
-                if not metadata_files:
-                    raise FileNotFoundError(
-                        f"No metadata files found in {metadata_dir}"
-                    )
-
-                # Use the most recent file
-                metadata_path = sorted(metadata_files, key=lambda f: f.stat().st_mtime)[
-                    -1
-                ]
-                logger.info(f"Using metadata file: {metadata_path}")
-
-            # Load the metadata
-            with open(metadata_path, "r") as f:
-                metadata = json.load(f)
-
-            # Check if params data exists in the metadata
-            if "params" not in metadata:
-                raise ValueError(f"No parameters metadata found in {metadata_path}")
-
-            # Get the params data
-            params_data = metadata["params"]
-            original_params_str = params_data.get("string", "")
-            original_signature = params_data.get("signature", "")
-            stored_signature_hash = params_data.get("signature_hash", "")
-
+            signed_params = sign_hash_deterministic(params_str, passphrase)
             logger.info(
-                f"VERIFICATION TRACE - Original Params String: {original_params_str}"
+                f"VERIFICATION TRACE - Deterministic Params Signature: {signed_params}"
             )
 
-            # Verify parameters match
-            params_match = self._compare_params_strings(params_str, original_params_str)
-            logger.info(f"VERIFICATION TRACE - Parameters Match: {params_match}")
+            # Hash the signature to get what should be on the blockchain
+            params_signature_hash = hashlib.sha256(signed_params.encode()).hexdigest()
+            logger.info(
+                f"VERIFICATION TRACE - Params Signature Hash (for blockchain): {params_signature_hash}"
+            )
 
-            # If params don't match exactly, check if they contain the same essential data
-            param_keys_match = False
-            if not params_match:
-                param_keys_match = self._compare_param_keys(
-                    params_str, original_params_str
-                )
-                logger.info(
-                    f"VERIFICATION TRACE - Parameters Keys Match: {param_keys_match}"
+            # Check if the signature hash exists in blockchain data
+            hash_match = params_signature_hash in blockchain_hashes["params"]
+            logger.info(f"VERIFICATION TRACE - Params Hash Match: {hash_match}")
+
+            if not hash_match:
+                logger.error(
+                    f"VERIFICATION TRACE - Params hash not found in blockchain. Available hashes: {blockchain_hashes['params']}"
                 )
 
-            # Load the public key and verify the signature
-            with open(public_key_path, "rb") as f:
-                public_key_pem = f.read()
-
-            # Verify the signature with the public key
-            sig_valid = verify_signature(
-                original_params_str, original_signature, public_key_pem
-            )
-            logger.info(f"VERIFICATION TRACE - Signature Valid: {sig_valid}")
-
-            # Calculate hash of signature to compare with blockchain
-            calculated_sig_hash = hashlib.sha256(
-                original_signature.encode()
-            ).hexdigest()
-            logger.info(
-                f"VERIFICATION TRACE - Calculated Signature Hash: {calculated_sig_hash}"
-            )
-            logger.info(
-                f"VERIFICATION TRACE - Stored Signature Hash: {stored_signature_hash}"
-            )
-            logger.info(
-                f"VERIFICATION TRACE - Signature Hash Match: {calculated_sig_hash == stored_signature_hash}"
-            )
-
-            # Overall verification result (either exact match or key match is acceptable)
-            verified = (
-                (params_match or param_keys_match)
-                and sig_valid
-                and (calculated_sig_hash == stored_signature_hash)
-            )
-
+            # Return verification result
             return {
-                "verified": verified,
+                "verified": hash_match,
                 "params_str": params_str,
-                "original_params_str": original_params_str,
-                "params_match": params_match,
-                "param_keys_match": param_keys_match,
-                "signature_valid": sig_valid,
-                "signature_hash_match": calculated_sig_hash == stored_signature_hash,
-                "timestamp": metadata.get("timestamp"),
+                "hash_match": hash_match,
+                "deterministic_signature": signed_params,
+                "signature_hash": params_signature_hash,
             }
 
         except Exception as e:
@@ -325,59 +171,46 @@ class AuditService:
             traceback.print_exc()
             return {"verified": False, "error": str(e)}
 
-    def generate_secure_audit_report(
+    def generate_audit_report(
         self,
         files_to_verify: List[Dict[str, str]],
-        params_dict: Optional[Dict[str, Any]] = None,
-        public_key_path: Union[str, Path] = None,
-        csv_path: Optional[Union[str, Path]] = None,
+        params_dict: Optional[Dict[str, Any]],
+        passphrase: str,  # Just passphrase, not private key
+        blockchain_hashes: Dict[str, List[str]],
+        transaction_count: int,
     ) -> Dict[str, Any]:
         """
-        Generate a comprehensive secure audit report for files and parameters.
+        Generate a comprehensive audit report for files and parameters.
 
         Args:
             files_to_verify: List of dictionaries with file paths and types
-                             [{"path": "/path/to/file.csv", "type": "book"}, ...]
             params_dict: Optional dictionary of parameters to verify
-            public_key_path: Path to the public key for verification
-            csv_path: Optional path to CSV file with transaction data
+            passphrase: The secret passphrase for signing
+            blockchain_hashes: Dictionary containing hashes from blockchain
+            transaction_count: Count of transactions in blockchain data
 
         Returns:
             Audit report dictionary
         """
         import datetime
-        import os
 
         # Initialize the report
         report = {
             "audit_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "csv_file": str(csv_path) if csv_path else None,
-            "transaction_count": (
-                0 if csv_path is None else 7
-            ),  # Default to 7 transactions or count lines in CSV
-            "public_key_path": str(public_key_path) if public_key_path else None,
+            "transaction_count": transaction_count,
             "file_verifications": [],
             "params_verification": None,
             "all_verified": True,
         }
-
-        # Count transactions if CSV exists
-        if csv_path and Path(csv_path).exists():
-            try:
-                with open(csv_path, "r") as f:
-                    # Subtract 1 for header row
-                    report["transaction_count"] = sum(1 for _ in f) - 1
-            except Exception as e:
-                logger.warning(f"Could not count transactions in CSV: {e}")
 
         # Verify each file
         for file_info in files_to_verify:
             file_path = file_info["path"]
             file_type = file_info["type"]
 
-            # Verify the file using the metadata
-            verification = self.verify_signed_file(
-                file_path, file_type, public_key_path
+            # Verify the file
+            verification = self.verify_file_against_blockchain(
+                file_path, file_type, passphrase, blockchain_hashes
             )
 
             report["file_verifications"].append(verification)
@@ -387,9 +220,8 @@ class AuditService:
 
         # Verify parameters if provided
         if params_dict:
-            # Verify parameters using the metadata
-            params_verification = self.verify_signed_params(
-                params_dict, public_key_path
+            params_verification = self.verify_params_against_blockchain(
+                params_dict, passphrase, blockchain_hashes
             )
 
             report["params_verification"] = params_verification
@@ -399,73 +231,46 @@ class AuditService:
 
         return report
 
-    def print_secure_audit_report(self, report: Dict[str, Any]) -> None:
+    def print_audit_report(self, report: Dict[str, Any]) -> None:
         """
-        Print a formatted secure audit report to the console.
+        Print a formatted audit report to the console.
 
         Args:
             report: Audit report dictionary
         """
-        print("=" * 80)
-        print("SECURE BLOCKCHAIN FILE INTEGRITY AUDIT REPORT")
+        print("\n" + "=" * 80)
+        print("BLOCKCHAIN FILE INTEGRITY AUDIT REPORT")
         print("=" * 80)
         print(f"Audit Date: {report['audit_date']}")
-        if report["csv_file"]:
-            print(f"CSV Transaction Record: {report['csv_file']}")
-            print(f"Transaction Count: {report['transaction_count']}")
-        print(f"Public Key: {report['public_key_path']}")
+        print(f"Transaction Count: {report['transaction_count']}")
 
         print("\n" + "-" * 80)
-        print("CRYPTOGRAPHICALLY VERIFIED FILE RESULTS:")
+        print("FILE VERIFICATION RESULTS:")
 
         for verification in report["file_verifications"]:
-            # Check if we have the expected keys
-            file_name = verification.get(
-                "file", verification.get("file_name", "Unknown file")
-            )
+            file_name = verification.get("file", "Unknown file")
+            file_type = verification.get("file_type", "")
 
-            print(f"\nFILE: {file_name}")
+            print(f"\nFILE: {file_name} ({file_type})")
             if verification.get("verified", False):
-                print("✅ VERIFICATION SUCCESSFUL - CRYPTOGRAPHIC SIGNATURE VALID")
-                print(f"  Hash Match: {verification.get('hash_match', False)}")
-                print(
-                    f"  Signature Valid: {verification.get('signature_valid', False)}"
-                )
-                print(
-                    f"  Signature Hash Match: {verification.get('signature_hash_match', False)}"
-                )
-
-                # Print timestamp if available
-                if verification.get("timestamp"):
-                    timestamp = verification.get("timestamp")
-                    if isinstance(timestamp, (int, float)):
-                        from datetime import datetime
-
-                        timestamp_str = datetime.fromtimestamp(timestamp).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        )
-                    else:
-                        timestamp_str = str(timestamp)
-                    print(f"  Timestamp: {timestamp_str}")
+                print("✅ VERIFICATION SUCCESSFUL")
+                print(f"  Original Hash: {verification.get('original_hash', 'N/A')}")
+                print(f"  Signature: {verification.get('signature', 'N/A')}")
+                print(f"  Signature Hash: {verification.get('signature_hash', 'N/A')}")
+                print(f"  Found in blockchain: Yes")
             else:
                 print("❌ VERIFICATION FAILED")
                 if "error" in verification:
                     print(f"  Error: {verification['error']}")
                 else:
-                    reasons = []
-                    if not verification.get("hash_match", True):
-                        reasons.append("File hash doesn't match")
-                    if not verification.get("signature_valid", True):
-                        reasons.append("Signature is not valid")
-                    if not verification.get("signature_hash_match", True):
-                        reasons.append("Signature hash doesn't match blockchain record")
-
-                    if reasons:
-                        print("  Reasons:")
-                        for reason in reasons:
-                            print(f"    - {reason}")
-                    else:
-                        print("  Unknown verification failure")
+                    print(
+                        f"  Original Hash: {verification.get('original_hash', 'N/A')}"
+                    )
+                    print(f"  Signature: {verification.get('signature', 'N/A')}")
+                    print(
+                        f"  Signature Hash: {verification.get('signature_hash', 'N/A')}"
+                    )
+                    print(f"  Found in blockchain: No")
 
         if report.get("params_verification"):
             print("\n" + "-" * 80)
@@ -473,95 +278,52 @@ class AuditService:
 
             params_verification = report["params_verification"]
             if params_verification.get("verified", False):
-                print("✅ VERIFICATION SUCCESSFUL - CRYPTOGRAPHIC SIGNATURE VALID")
+                print("✅ VERIFICATION SUCCESSFUL")
+                print(f"  Parameters: {params_verification.get('params_str', 'N/A')}")
+                print(f"  Signature: {params_verification.get('signature', 'N/A')}")
                 print(
-                    f"  Parameters Match: {params_verification.get('params_match', False)}"
+                    f"  Signature Hash: {params_verification.get('signature_hash', 'N/A')}"
                 )
-                if not params_verification.get(
-                    "params_match", True
-                ) and params_verification.get("param_keys_match", False):
-                    print("  Essential Parameter Keys Match: True")
-                print(
-                    f"  Signature Valid: {params_verification.get('signature_valid', False)}"
-                )
-                print(
-                    f"  Signature Hash Match: {params_verification.get('signature_hash_match', False)}"
-                )
-
-                # Print timestamp if available
-                if params_verification.get("timestamp"):
-                    timestamp = params_verification.get("timestamp")
-                    if isinstance(timestamp, (int, float)):
-                        from datetime import datetime
-
-                        timestamp_str = datetime.fromtimestamp(timestamp).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        )
-                    else:
-                        timestamp_str = str(timestamp)
-                    print(f"  Timestamp: {timestamp_str}")
+                print(f"  Found in blockchain: Yes")
             else:
                 print("❌ VERIFICATION FAILED")
-                if "message" in params_verification:
-                    print(f"  Message: {params_verification['message']}")
-                elif "error" in params_verification:
+                if "error" in params_verification:
                     print(f"  Error: {params_verification['error']}")
                 else:
-                    reasons = []
-                    if not params_verification.get(
-                        "params_match", True
-                    ) and not params_verification.get("param_keys_match", True):
-                        reasons.append("Parameters don't match")
-                    if not params_verification.get("signature_valid", True):
-                        reasons.append("Signature is not valid")
-                    if not params_verification.get("signature_hash_match", True):
-                        reasons.append("Signature hash doesn't match blockchain record")
-
-                    if reasons:
-                        print("  Reasons:")
-                        for reason in reasons:
-                            print(f"    - {reason}")
-                    else:
-                        print("  Unknown verification failure")
+                    print(
+                        f"  Parameters: {params_verification.get('params_str', 'N/A')}"
+                    )
+                    print(f"  Signature: {params_verification.get('signature', 'N/A')}")
+                    print(
+                        f"  Signature Hash: {params_verification.get('signature_hash', 'N/A')}"
+                    )
+                    print(f"  Found in blockchain: No")
 
         # Overall conclusion
         print("\n" + "=" * 80)
         print("AUDIT CONCLUSION:")
         if report["all_verified"]:
-            print(
-                "✅ All files and parameters have been CRYPTOGRAPHICALLY verified successfully."
-            )
-            print("Both data integrity and AUTHENTICITY are confirmed.")
-            print(
-                "The signatures prove these files were registered by the genuine key owner."
-            )
+            print("✅ All files and parameters have been verified successfully.")
+            print("The data integrity is confirmed. No modifications detected.")
         else:
-            print(
-                "❌ Some cryptographic verifications failed. See the detailed report above."
-            )
-            print(
-                "Either the files/parameters have been modified, the signatures are invalid,"
-            )
-            print("or the blockchain records are incomplete.")
+            print("❌ Some verifications failed. See the detailed report above.")
+            print("Data integrity issues detected or files may have been modified.")
         print("=" * 80)
 
     def save_audit_report(
-        self, report: Dict[str, Any], output_path: Union[str, Path] = None
+        self, report: Dict[str, Any], output_path: Union[str, Path]
     ) -> Path:
         """
         Save the audit report to a file.
 
         Args:
             report: The audit report dictionary
-            output_path: Optional path to save the report to (defaults to audit_report.json)
+            output_path: Path to save the report to
 
         Returns:
             Path to the saved report
         """
-        if output_path is None:
-            output_path = Path("audit_report.json")
-        else:
-            output_path = Path(output_path)
+        output_path = Path(output_path)
 
         # Create directory if it doesn't exist
         output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,9 +1,10 @@
 # services/file_integrity_service.py
-import time
+import hashlib
 import logging
 from pathlib import Path
 from typing import Dict, Optional, Union
 
+import config
 from utils.hash_file_utils import calculate_file_hash
 from services.user_contract_service import update_user_local_state
 from utils.algorand import get_user_local_state
@@ -96,19 +97,11 @@ class FileIntegrityService:
         Update the smart contract with cryptographically signed file hashes.
         """
         try:
-            from services.crypto_service import sign_hash, load_private_key
-            from cryptography.hazmat.primitives import serialization
-            import hashlib
-
-            # Load private key with passphrase if provided
-            private_key = load_private_key(private_key_path, passphrase)
-
-            # Get private key in PEM format for signing
-            private_key_pem = private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption(),
-            )
+            # Use the passphrase directly, not the private key
+            if not passphrase:
+                passphrase = config.SECRET_PASS_PHRASE
+                if not passphrase:
+                    raise ValueError("Passphrase is required for signing")
 
             # Calculate hashes
             hashes = self.calculate_and_store_hashes(
@@ -119,123 +112,60 @@ class FileIntegrityService:
             book_hash = hashes["book_hash"]
             research_hash = hashes.get("research_hash", "")
 
-            # Enhanced logging for book file
-            book_filename = Path(book_file_path).name
-            logger.info(f"CRYPTO TRACE - Book File: {book_filename}")
-            logger.info(f"CRYPTO TRACE - 1. Original File Hash: {book_hash}")
+            # Sign the book hash deterministically using the passphrase
+            from services.crypto_service import sign_hash_deterministic
 
-            # Sign the book hash
-            signed_book_hash = sign_hash(book_hash, private_key_pem)
+            signed_book_hash = sign_hash_deterministic(book_hash, passphrase)
+            logger.info(f"CRYPTO TRACE - Book File: {Path(book_file_path).name}")
+            logger.info(f"CRYPTO TRACE - 1. Original File Hash: {book_hash}")
             logger.info(
-                f"CRYPTO TRACE - 2. Signed Hash (truncated): {signed_book_hash[:50]}..."
+                f"CRYPTO TRACE - 2. Deterministic Signature: {signed_book_hash}"
             )
 
-            # Hash the signature
+            # Hash the signature to get the final blockchain value
             book_signature_hash = hashlib.sha256(signed_book_hash.encode()).hexdigest()
             logger.info(
                 f"CRYPTO TRACE - 3. Final Hash Stored on Blockchain: {book_signature_hash}"
             )
 
-            # Log crypto steps for research file if present
+            # Sign the research hash if present
+            research_signature_hash = ""
             if research_hash:
-                research_filename = Path(research_file_path).name
-                logger.info(f"CRYPTO TRACE - Research File: {research_filename}")
-                logger.info(f"CRYPTO TRACE - 1. Original File Hash: {research_hash}")
-
-                # Sign the research hash
-                signed_research_hash = sign_hash(research_hash, private_key_pem)
-                logger.info(
-                    f"CRYPTO TRACE - 2. Signed Hash (truncated): {signed_research_hash[:50]}..."
+                signed_research_hash = sign_hash_deterministic(
+                    research_hash, passphrase
                 )
-
-                # Hash the signature
                 research_signature_hash = hashlib.sha256(
                     signed_research_hash.encode()
                 ).hexdigest()
-                logger.info(
-                    f"CRYPTO TRACE - 3. Final Hash Stored on Blockchain: {research_signature_hash}"
-                )
-            else:
-                signed_research_hash = ""
-                research_signature_hash = ""
 
-            # Create parameters dictionary
+            # Create and sign parameters
             params_dict = {
                 "book_file": Path(book_file_path).name,
                 "user": user_id,
                 "book": book_id,
             }
 
-            # Add research file if provided
             if research_file_path and research_hash:
                 params_dict["research_file"] = Path(research_file_path).name
 
-            # Add additional parameters
             if additional_params:
                 params_dict.update(additional_params)
 
-            # Format parameters and log the process
+            # Format parameters
             params_str = "|".join([f"{k}:{v}" for k, v in sorted(params_dict.items())])
             logger.info(f"CRYPTO TRACE - Parameters String: {params_str}")
 
-            # Sign the params
-            signed_params = sign_hash(params_str, private_key_pem)
-            logger.info(
-                f"CRYPTO TRACE - Signed Parameters (truncated): {signed_params[:50]}..."
-            )
+            # Sign parameters
+            signed_params = sign_hash_deterministic(params_str, passphrase)
+            logger.info(f"CRYPTO TRACE - Parameters Signature: {signed_params}")
 
-            # Hash the signature
+            # Hash the signature for blockchain
             params_signature_hash = hashlib.sha256(signed_params.encode()).hexdigest()
             logger.info(
-                f"CRYPTO TRACE - Parameters Hash Stored on Blockchain: {params_signature_hash}"
+                f"CRYPTO TRACE - Parameters Hash for Blockchain: {params_signature_hash}"
             )
 
-            # Store additional verification metadata locally (optional, but helpful)
-            verification_metadata = {
-                "user_id": user_id,
-                "book_id": book_id,
-                "timestamp": time.time(),
-                "book_file": {
-                    "name": book_filename,
-                    "original_hash": book_hash,
-                    "signature": signed_book_hash,
-                    "signature_hash": book_signature_hash,
-                },
-                "params": {
-                    "string": params_str,
-                    "signature": signed_params,
-                    "signature_hash": params_signature_hash,
-                },
-            }
-
-            # Add research file data if available
-            if research_hash:
-                verification_metadata["research_file"] = {
-                    "name": Path(research_file_path).name,
-                    "original_hash": research_hash,
-                    "signature": signed_research_hash,
-                    "signature_hash": research_signature_hash,
-                }
-
-            # Save metadata to a local file for future verification
-            metadata_dir = Path("verification_metadata")
-            metadata_dir.mkdir(exist_ok=True)
-            metadata_file = (
-                metadata_dir / f"{user_id}_{book_id}_{int(time.time())}.json"
-            )
-
-            with open(metadata_file, "w") as f:
-                import json
-
-                json.dump(verification_metadata, f, indent=2)
-
-            logger.info(
-                f"CRYPTO TRACE - Verification metadata saved to {metadata_file}"
-            )
-
-            # Update blockchain with hashed signatures
-            from services.user_contract_service import update_user_local_state
-
+            # Update blockchain
             result = update_user_local_state(
                 user_id,
                 book_id,

@@ -1,11 +1,10 @@
 # services/file_integrity_service.py
-import os
 import time
 import shutil
 import logging
 import json
 from pathlib import Path
-from typing import Dict, Any, Tuple, Optional, List, Union
+from typing import Dict, Any, Optional, List, Union
 
 import config
 from utils.hash_file_utils import calculate_file_hash
@@ -30,48 +29,6 @@ class FileIntegrityService:
         self.book_data_dir = BOOK_DATA_DIR
         self.research_dir = RESEARCH_DIR
 
-    def store_file(
-        self, file_path: Union[str, Path], user_id: str, book_id: str, file_type: str
-    ) -> Path:
-        """
-        Store a file in the appropriate directory.
-
-        Args:
-            file_path: Path to the file to store
-            user_id: User identifier
-            book_id: Book identifier
-            file_type: Type of file ('book' or 'research')
-
-        Returns:
-            Path to the stored file
-        """
-        file_path = Path(file_path)
-        if not file_path.exists():
-            raise FileNotFoundError(f"File not found: {file_path}")
-
-        # Determine destination directory
-        if file_type.lower() == "book":
-            dest_dir = self.book_data_dir
-            extension = file_path.suffix or ".csv"
-        elif file_type.lower() == "research":
-            dest_dir = self.research_dir
-            extension = file_path.suffix or ".pdf"
-        else:
-            raise ValueError(
-                f"Invalid file type: {file_type}. Must be 'book' or 'research'"
-            )
-
-        # Create a timestamped filename
-        timestamp = int(time.time())
-        dest_filename = f"{user_id}_{book_id}_{file_type}_{timestamp}{extension}"
-        dest_path = dest_dir / dest_filename
-
-        # Copy the file
-        shutil.copy2(file_path, dest_path)
-        logger.info(f"Stored {file_type} file for {user_id}/{book_id} at {dest_path}")
-
-        return dest_path
-
     def hash_params_string(self, params_str: str) -> str:
         """
         Create a hash of the parameters string.
@@ -92,7 +49,6 @@ class FileIntegrityService:
         book_id: str,
         book_file_path: Union[str, Path],
         research_file_path: Optional[Union[str, Path]] = None,
-        store_files: bool = True,
     ) -> Dict[str, str]:
         """
         Calculate hashes for the book file and optionally research file.
@@ -102,7 +58,6 @@ class FileIntegrityService:
             book_id: Book identifier
             book_file_path: Path to the book data file (required)
             research_file_path: Path to the research file (optional)
-            store_files: Whether to store copies of the files
 
         Returns:
             Dictionary with book_hash and optional research_hash
@@ -134,24 +89,6 @@ class FileIntegrityService:
 
         result["research_hash"] = research_hash
 
-        # Store files if requested
-        if store_files:
-            # Store book file
-            book_stored_path = self.store_file(book_file_path, user_id, book_id, "book")
-            result["book_stored_path"] = (
-                book_stored_path  # Add this line to store the path
-            )
-
-            # Store research file if provided
-            research_stored_path = None
-            if research_file_path and Path(research_file_path).exists():
-                research_stored_path = self.store_file(
-                    research_file_path, user_id, book_id, "research"
-                )
-                result["research_stored_path"] = (
-                    research_stored_path  # Add this line to store the path
-                )
-
         return result
 
     def update_contract_with_signed_hashes(
@@ -162,7 +99,6 @@ class FileIntegrityService:
         private_key_path: Union[str, Path],
         research_file_path: Optional[Union[str, Path]] = None,
         additional_params: Optional[Dict[str, str]] = None,
-        store_files: bool = True,
         passphrase: Optional[str] = None,
     ) -> bool:
         """
@@ -175,7 +111,6 @@ class FileIntegrityService:
             private_key_path: Path to the private key PEM file
             research_file_path: Path to the research file (optional)
             additional_params: Additional parameters to include (optional)
-            store_files: Whether to store copies of the files
             passphrase: Passphrase to decrypt private key if encrypted
 
         Returns:
@@ -196,7 +131,7 @@ class FileIntegrityService:
 
             # Calculate hashes
             hashes = self.calculate_and_store_hashes(
-                user_id, book_id, book_file_path, research_file_path, store_files
+                user_id, book_id, book_file_path, research_file_path
             )
 
             # Get file hashes
@@ -228,59 +163,6 @@ class FileIntegrityService:
             params_str = "|".join([f"{k}:{v}" for k, v in sorted(params_dict.items())])
             signed_params = sign_hash(params_str, private_key_pem)
 
-            # Store metadata
-            if store_files:
-                # Get public key
-                from cryptography.hazmat.primitives import serialization
-
-                private_key = serialization.load_pem_private_key(
-                    private_key_pem, password=None
-                )
-                public_key_pem = private_key.public_key().public_bytes(
-                    encoding=serialization.Encoding.PEM,
-                    format=serialization.PublicFormat.SubjectPublicKeyInfo,
-                )
-
-                # Save metadata including original hashes, signatures, and public key
-                metadata = {
-                    "user_id": user_id,
-                    "book_id": book_id,
-                    "timestamp": time.time(),
-                    "book_hash": {"original": book_hash, "signed": signed_book_hash},
-                    "research_hash": {
-                        "original": research_hash,
-                        "signed": signed_research_hash,
-                    },
-                    "params": {
-                        "dict": params_dict,
-                        "string": params_str,
-                        "signed": signed_params,
-                    },
-                    "public_key": public_key_pem.decode(),
-                }
-
-                # Store book and research files if provided
-                if "book_stored_path" in hashes:
-                    metadata["book_file"] = {
-                        "path": str(hashes["book_stored_path"]),
-                        "original_filename": Path(book_file_path).name,
-                    }
-
-                if "research_stored_path" in hashes and research_file_path:
-                    metadata["research_file"] = {
-                        "path": str(hashes["research_stored_path"]),
-                        "original_filename": Path(research_file_path).name,
-                    }
-
-                # Save metadata
-                metadata_path = (
-                    STORAGE_ROOT / f"{user_id}_{book_id}_secure_metadata.json"
-                )
-                with open(metadata_path, "w") as f:
-                    json.dump(metadata, f, indent=2)
-
-                logger.info(f"Stored secure metadata in {metadata_path}")
-
             # Update blockchain with signed hashes
             from services.user_contract_service import update_user_local_state
 
@@ -310,7 +192,6 @@ class FileIntegrityService:
         book_file_path: Union[str, Path],
         research_file_path: Optional[Union[str, Path]] = None,
         additional_params: Optional[Dict[str, str]] = None,
-        store_files: bool = True,
     ) -> bool:
         """
         Update the smart contract with file hashes.
@@ -318,7 +199,7 @@ class FileIntegrityService:
         try:
             # Calculate hashes
             hashes = self.calculate_and_store_hashes(
-                user_id, book_id, book_file_path, research_file_path, store_files
+                user_id, book_id, book_file_path, research_file_path
             )
 
             book_hash = hashes["book_hash"]
@@ -352,39 +233,6 @@ class FileIntegrityService:
 
             # Use just the hash directly as the params string
             params_str = params_hash
-
-            # Store the full parameters metadata
-            if store_files:
-                # Include current timestamp only in metadata, not in the hashed parameters
-                metadata = {
-                    "user_id": user_id,
-                    "book_id": book_id,
-                    "timestamp": time.time(),  # For metadata only
-                    "params_hash": params_hash,
-                    "full_params": params_dict,
-                    "full_params_str": full_params_str,
-                    "book_file": {
-                        "path": str(hashes.get("book_stored_path", "")),
-                        "hash": book_hash,
-                        "original_filename": Path(book_file_path).name,
-                    },
-                }
-
-                # Add research file metadata if available
-                if research_file_path and research_hash:
-                    metadata["research_file"] = {
-                        "path": str(hashes.get("research_stored_path", "")),
-                        "hash": research_hash,
-                        "original_filename": Path(research_file_path).name,
-                    }
-
-                metadata_path = (
-                    STORAGE_ROOT / f"{user_id}_{book_id}_{params_hash}_metadata.json"
-                )
-                with open(metadata_path, "w") as f:
-                    json.dump(metadata, f, indent=2)
-
-                logger.info(f"Stored full params metadata in {metadata_path}")
 
             # Update the contract's local state with hash values
             result = update_user_local_state(
@@ -636,264 +484,6 @@ class FileIntegrityService:
             logger.error(f"Error getting file history: {e}")
             return []
 
-
-def verify_signed_file(
-    self, file_path: Union[str, Path], file_type: str, public_key_path: Union[str, Path]
-) -> List[Dict[str, Any]]:
-    """
-    Verify a file against cryptographically signed hashes in transaction records.
-
-    Args:
-        file_path: Path to the file to verify
-        file_type: Type of file ('book' or 'research')
-        public_key_path: Path to the public key PEM file
-
-    Returns:
-        List of matching transaction records
-    """
-    from services.crypto_service import verify_signature
-
-    # Load public key
-    with open(public_key_path, "rb") as f:
-        public_key_pem = f.read()
-
-    # Calculate file hash
-    file_path = Path(file_path)
-    current_hash = self.calculate_file_hash(file_path)
-    logger.info(f"Calculated hash for {file_path.name}: {current_hash}")
-
-    # Determine column name
-    hash_column = f"l_{file_type.lower()}_hash"
-
-    # Find matching transactions with valid signatures
-    matches = []
-    for tx in self.transactions:
-        if hash_column not in tx:
-            continue
-
-        signed_hash = tx[hash_column]
-        if not signed_hash or signed_hash == "NAN":
-            continue
-
-        # Verify signature
-        is_valid = verify_signature(current_hash, signed_hash, public_key_pem)
-
-        if is_valid:
-            match_info = {
-                "transaction_id": tx["transaction_id"],
-                "date": tx["date"],
-                "sender": tx["sender"],
-                "signed_hash": signed_hash,
-                "original_hash": current_hash,
-                "is_valid": is_valid,
-                "file_name": file_path.name,
-                "file_type": file_type,
-            }
-            matches.append(match_info)
-
-    if matches:
-        logger.info(f"File {file_path.name} has {len(matches)} valid signed records")
-    else:
-        logger.warning(f"File {file_path.name} has no valid signed records")
-
-    return matches
-
-
-def verify_signed_params(
-    self, params_dict: Dict[str, Any], public_key_path: Union[str, Path]
-) -> List[Dict[str, Any]]:
-    """
-    Verify parameters against cryptographically signed hashes in transaction records.
-
-    Args:
-        params_dict: Dictionary of parameters to verify
-        public_key_path: Path to the public key PEM file
-
-    Returns:
-        List of matching transaction records
-    """
-    from services.crypto_service import verify_signature
-
-    # Load public key
-    with open(public_key_path, "rb") as f:
-        public_key_pem = f.read()
-
-    # Format parameters
-    params_str = self.format_params_dict(params_dict)
-    logger.info(f"Formatted parameters: {params_str}")
-
-    # Find matching transactions with valid signatures
-    matches = []
-    for tx in self.transactions:
-        if "l_params" not in tx:
-            continue
-
-        signed_params = tx["l_params"]
-        if not signed_params or signed_params == "NAN":
-            continue
-
-        # Verify signature
-        is_valid = verify_signature(params_str, signed_params, public_key_pem)
-
-        if is_valid:
-            match_info = {
-                "transaction_id": tx["transaction_id"],
-                "date": tx["date"],
-                "sender": tx["sender"],
-                "signed_hash": signed_params,
-                "params_str": params_str,
-                "is_valid": is_valid,
-            }
-            matches.append(match_info)
-
-    if matches:
-        logger.info(f"Parameters have {len(matches)} valid signed records")
-    else:
-        logger.warning(f"Parameters have no valid signed records")
-
-    return matches
-
-
-def generate_secure_audit_report(
-    self,
-    files_to_verify: List[Dict[str, str]],
-    params_dict: Optional[Dict[str, Any]],
-    public_key_path: Union[str, Path],
-) -> Dict[str, Any]:
-    """
-    Generate a comprehensive audit report using cryptographic verification.
-
-    Args:
-        files_to_verify: List of dictionaries with file paths and types
-        params_dict: Optional dictionary of parameters to verify
-        public_key_path: Path to the public key for signature verification
-
-    Returns:
-        Audit report dictionary
-    """
-    report = {
-        "audit_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "csv_file": str(self.csv_path),
-        "transaction_count": len(self.transactions),
-        "public_key_path": str(public_key_path),
-        "file_verifications": [],
-        "params_verification": None,
-        "all_verified": True,
-    }
-
-    # Verify each file
-    for file_info in files_to_verify:
-        file_path = file_info["path"]
-        file_type = file_info["type"]
-
-        matches = self.verify_signed_file(file_path, file_type, public_key_path)
-        verification = {
-            "file_name": Path(file_path).name,
-            "file_type": file_type,
-            "verification_result": len(matches) > 0,
-            "match_count": len(matches),
-            "matches": matches,
-        }
-
-        report["file_verifications"].append(verification)
-        report["all_verified"] = (
-            report["all_verified"] and verification["verification_result"]
-        )
-
-    # Verify parameters if provided
-    if params_dict:
-        matches = self.verify_signed_params(params_dict, public_key_path)
-        params_verification = {
-            "params_str": self.format_params_dict(params_dict),
-            "verification_result": len(matches) > 0,
-            "match_count": len(matches),
-            "matches": matches,
-        }
-
-        report["params_verification"] = params_verification
-        report["all_verified"] = (
-            report["all_verified"] and params_verification["verification_result"]
-        )
-
-    return report
-
-
-def print_secure_audit_report(self, report: Dict[str, Any]) -> None:
-    """
-    Print a formatted secure audit report to the console.
-
-    Args:
-        report: Secure audit report dictionary
-    """
-    print("=" * 80)
-    print("SECURE BLOCKCHAIN FILE INTEGRITY AUDIT REPORT")
-    print("=" * 80)
-    print(f"Audit Date: {report['audit_date']}")
-    print(f"CSV Transaction Record: {report['csv_file']}")
-    print(f"Transaction Count: {report['transaction_count']}")
-    print(f"Public Key: {report['public_key_path']}")
-
-    print("\n" + "-" * 80)
-    print("CRYPTOGRAPHICALLY VERIFIED FILE RESULTS:")
-
-    for verification in report["file_verifications"]:
-        print(
-            f"\n{verification['file_type'].upper()} FILE: {verification['file_name']}"
-        )
-        if verification["verification_result"]:
-            print("✅ VERIFICATION SUCCESSFUL - SIGNATURE VALID")
-            print(f"  Match Count: {verification['match_count']}")
-
-            # Show the most recent match
-            if verification["matches"]:
-                most_recent = verification["matches"][-1]
-                print(f"  Most Recent Verified Transaction:")
-                print(f"    Transaction ID: {most_recent['transaction_id']}")
-                print(f"    Date: {most_recent['date']}")
-        else:
-            print("❌ VERIFICATION FAILED - NO VALID SIGNATURE")
-            print("  No matching records found with valid signatures")
-
-    if report.get("params_verification"):
-        print("\n" + "-" * 80)
-        print("CRYPTOGRAPHICALLY VERIFIED PARAMETERS RESULTS:")
-
-        params_verification = report["params_verification"]
-        if params_verification["verification_result"]:
-            print("✅ VERIFICATION SUCCESSFUL - SIGNATURE VALID")
-            print(f"  Match Count: {params_verification['match_count']}")
-
-            # Show the most recent match
-            if params_verification.get("matches"):
-                most_recent = params_verification["matches"][-1]
-                print(f"  Most Recent Verified Transaction:")
-                print(f"    Transaction ID: {most_recent['transaction_id']}")
-                print(f"    Date: {most_recent['date']}")
-        else:
-            print("❌ VERIFICATION FAILED - NO VALID SIGNATURE")
-            print("  No matching records found with valid signatures")
-
-    # Overall conclusion
-    print("\n" + "=" * 80)
-    print("SECURE AUDIT CONCLUSION:")
-    if report["all_verified"]:
-        print(
-            "✅ All files and parameters have been CRYPTOGRAPHICALLY verified successfully."
-        )
-        print("Both data integrity and AUTHENTICITY are confirmed.")
-        print(
-            "The signatures prove these files were registered by the genuine key owner."
-        )
-    else:
-        print(
-            "❌ Some cryptographic verifications failed. See the detailed report above."
-        )
-        print(
-            "Either the files/parameters have been modified, the signatures are invalid,"
-        )
-        print("or the wrong public key was used for verification.")
-    print("=" * 80)
-
     def verify_signed_file(
         self,
         file_path: Union[str, Path],
@@ -960,198 +550,195 @@ def print_secure_audit_report(self, report: Dict[str, Any]) -> None:
 
         return matches
 
+    def verify_signed_params(
+        self, params_dict: Dict[str, Any], public_key_path: Union[str, Path]
+    ) -> List[Dict[str, Any]]:
+        """
+        Verify parameters against cryptographically signed hashes in transaction records.
 
-def verify_signed_params(
-    self, params_dict: Dict[str, Any], public_key_path: Union[str, Path]
-) -> List[Dict[str, Any]]:
-    """
-    Verify parameters against cryptographically signed hashes in transaction records.
+        Args:
+            params_dict: Dictionary of parameters to verify
+            public_key_path: Path to the public key PEM file
 
-    Args:
-        params_dict: Dictionary of parameters to verify
-        public_key_path: Path to the public key PEM file
+        Returns:
+            List of matching transaction records
+        """
+        from services.crypto_service import verify_signature
 
-    Returns:
-        List of matching transaction records
-    """
-    from services.crypto_service import verify_signature
+        # Load public key
+        with open(public_key_path, "rb") as f:
+            public_key_pem = f.read()
 
-    # Load public key
-    with open(public_key_path, "rb") as f:
-        public_key_pem = f.read()
+        # Format parameters
+        params_str = self.format_params_dict(params_dict)
+        logger.info(f"Formatted parameters: {params_str}")
 
-    # Format parameters
-    params_str = self.format_params_dict(params_dict)
-    logger.info(f"Formatted parameters: {params_str}")
+        # Find matching transactions with valid signatures
+        matches = []
+        for tx in self.transactions:
+            if "l_params" not in tx:
+                continue
 
-    # Find matching transactions with valid signatures
-    matches = []
-    for tx in self.transactions:
-        if "l_params" not in tx:
-            continue
+            signed_params = tx["l_params"]
+            if not signed_params or signed_params == "NAN":
+                continue
 
-        signed_params = tx["l_params"]
-        if not signed_params or signed_params == "NAN":
-            continue
+            # Verify signature
+            is_valid = verify_signature(params_str, signed_params, public_key_pem)
 
-        # Verify signature
-        is_valid = verify_signature(params_str, signed_params, public_key_pem)
+            if is_valid:
+                match_info = {
+                    "transaction_id": tx["transaction_id"],
+                    "date": tx["date"],
+                    "sender": tx["sender"],
+                    "signed_hash": signed_params,
+                    "params_str": params_str,
+                    "is_valid": is_valid,
+                }
+                matches.append(match_info)
 
-        if is_valid:
-            match_info = {
-                "transaction_id": tx["transaction_id"],
-                "date": tx["date"],
-                "sender": tx["sender"],
-                "signed_hash": signed_params,
-                "params_str": params_str,
-                "is_valid": is_valid,
+        if matches:
+            logger.info(f"Parameters have {len(matches)} valid signed records")
+        else:
+            logger.warning(f"Parameters have no valid signed records")
+
+        return matches
+
+    def generate_secure_audit_report(
+        self,
+        files_to_verify: List[Dict[str, str]],
+        params_dict: Optional[Dict[str, Any]],
+        public_key_path: Union[str, Path],
+    ) -> Dict[str, Any]:
+        """
+        Generate a comprehensive audit report using cryptographic verification.
+
+        Args:
+            files_to_verify: List of dictionaries with file paths and types
+            params_dict: Optional dictionary of parameters to verify
+            public_key_path: Path to the public key for signature verification
+
+        Returns:
+            Audit report dictionary
+        """
+        report = {
+            "audit_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "csv_file": str(self.csv_path),
+            "transaction_count": len(self.transactions),
+            "public_key_path": str(public_key_path),
+            "file_verifications": [],
+            "params_verification": None,
+            "all_verified": True,
+        }
+
+        # Verify each file
+        for file_info in files_to_verify:
+            file_path = file_info["path"]
+            file_type = file_info["type"]
+
+            matches = self.verify_signed_file(file_path, file_type, public_key_path)
+            verification = {
+                "file_name": Path(file_path).name,
+                "file_type": file_type,
+                "verification_result": len(matches) > 0,
+                "match_count": len(matches),
+                "matches": matches,
             }
-            matches.append(match_info)
 
-    if matches:
-        logger.info(f"Parameters have {len(matches)} valid signed records")
-    else:
-        logger.warning(f"Parameters have no valid signed records")
+            report["file_verifications"].append(verification)
+            report["all_verified"] = (
+                report["all_verified"] and verification["verification_result"]
+            )
 
-    return matches
+        # Verify parameters if provided
+        if params_dict:
+            matches = self.verify_signed_params(params_dict, public_key_path)
+            params_verification = {
+                "params_str": self.format_params_dict(params_dict),
+                "verification_result": len(matches) > 0,
+                "match_count": len(matches),
+                "matches": matches,
+            }
 
+            report["params_verification"] = params_verification
+            report["all_verified"] = (
+                report["all_verified"] and params_verification["verification_result"]
+            )
 
-def generate_secure_audit_report(
-    self,
-    files_to_verify: List[Dict[str, str]],
-    params_dict: Optional[Dict[str, Any]],
-    public_key_path: Union[str, Path],
-) -> Dict[str, Any]:
-    """
-    Generate a comprehensive audit report using cryptographic verification.
+        return report
 
-    Args:
-        files_to_verify: List of dictionaries with file paths and types
-        params_dict: Optional dictionary of parameters to verify
-        public_key_path: Path to the public key for signature verification
+    def print_secure_audit_report(self, report: Dict[str, Any]) -> None:
+        """
+        Print a formatted secure audit report to the console.
 
-    Returns:
-        Audit report dictionary
-    """
-    report = {
-        "audit_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "csv_file": str(self.csv_path),
-        "transaction_count": len(self.transactions),
-        "public_key_path": str(public_key_path),
-        "file_verifications": [],
-        "params_verification": None,
-        "all_verified": True,
-    }
+        Args:
+            report: Secure audit report dictionary
+        """
+        print("=" * 80)
+        print("SECURE BLOCKCHAIN FILE INTEGRITY AUDIT REPORT")
+        print("=" * 80)
+        print(f"Audit Date: {report['audit_date']}")
+        print(f"CSV Transaction Record: {report['csv_file']}")
+        print(f"Transaction Count: {report['transaction_count']}")
+        print(f"Public Key: {report['public_key_path']}")
 
-    # Verify each file
-    for file_info in files_to_verify:
-        file_path = file_info["path"]
-        file_type = file_info["type"]
-
-        matches = self.verify_signed_file(file_path, file_type, public_key_path)
-        verification = {
-            "file_name": Path(file_path).name,
-            "file_type": file_type,
-            "verification_result": len(matches) > 0,
-            "match_count": len(matches),
-            "matches": matches,
-        }
-
-        report["file_verifications"].append(verification)
-        report["all_verified"] = (
-            report["all_verified"] and verification["verification_result"]
-        )
-
-    # Verify parameters if provided
-    if params_dict:
-        matches = self.verify_signed_params(params_dict, public_key_path)
-        params_verification = {
-            "params_str": self.format_params_dict(params_dict),
-            "verification_result": len(matches) > 0,
-            "match_count": len(matches),
-            "matches": matches,
-        }
-
-        report["params_verification"] = params_verification
-        report["all_verified"] = (
-            report["all_verified"] and params_verification["verification_result"]
-        )
-
-    return report
-
-
-def print_secure_audit_report(self, report: Dict[str, Any]) -> None:
-    """
-    Print a formatted secure audit report to the console.
-
-    Args:
-        report: Secure audit report dictionary
-    """
-    print("=" * 80)
-    print("SECURE BLOCKCHAIN FILE INTEGRITY AUDIT REPORT")
-    print("=" * 80)
-    print(f"Audit Date: {report['audit_date']}")
-    print(f"CSV Transaction Record: {report['csv_file']}")
-    print(f"Transaction Count: {report['transaction_count']}")
-    print(f"Public Key: {report['public_key_path']}")
-
-    print("\n" + "-" * 80)
-    print("CRYPTOGRAPHICALLY VERIFIED FILE RESULTS:")
-
-    for verification in report["file_verifications"]:
-        print(
-            f"\n{verification['file_type'].upper()} FILE: {verification['file_name']}"
-        )
-        if verification["verification_result"]:
-            print("✅ VERIFICATION SUCCESSFUL - SIGNATURE VALID")
-            print(f"  Match Count: {verification['match_count']}")
-
-            # Show the most recent match
-            if verification["matches"]:
-                most_recent = verification["matches"][-1]
-                print(f"  Most Recent Verified Transaction:")
-                print(f"    Transaction ID: {most_recent['transaction_id']}")
-                print(f"    Date: {most_recent['date']}")
-        else:
-            print("❌ VERIFICATION FAILED - NO VALID SIGNATURE")
-            print("  No matching records found with valid signatures")
-
-    if report.get("params_verification"):
         print("\n" + "-" * 80)
-        print("CRYPTOGRAPHICALLY VERIFIED PARAMETERS RESULTS:")
+        print("CRYPTOGRAPHICALLY VERIFIED FILE RESULTS:")
 
-        params_verification = report["params_verification"]
-        if params_verification["verification_result"]:
-            print("✅ VERIFICATION SUCCESSFUL - SIGNATURE VALID")
-            print(f"  Match Count: {params_verification['match_count']}")
+        for verification in report["file_verifications"]:
+            print(
+                f"\n{verification['file_type'].upper()} FILE: {verification['file_name']}"
+            )
+            if verification["verification_result"]:
+                print("✅ VERIFICATION SUCCESSFUL - SIGNATURE VALID")
+                print(f"  Match Count: {verification['match_count']}")
 
-            # Show the most recent match
-            if params_verification.get("matches"):
-                most_recent = params_verification["matches"][-1]
-                print(f"  Most Recent Verified Transaction:")
-                print(f"    Transaction ID: {most_recent['transaction_id']}")
-                print(f"    Date: {most_recent['date']}")
+                # Show the most recent match
+                if verification["matches"]:
+                    most_recent = verification["matches"][-1]
+                    print(f"  Most Recent Verified Transaction:")
+                    print(f"    Transaction ID: {most_recent['transaction_id']}")
+                    print(f"    Date: {most_recent['date']}")
+            else:
+                print("❌ VERIFICATION FAILED - NO VALID SIGNATURE")
+                print("  No matching records found with valid signatures")
+
+        if report.get("params_verification"):
+            print("\n" + "-" * 80)
+            print("CRYPTOGRAPHICALLY VERIFIED PARAMETERS RESULTS:")
+
+            params_verification = report["params_verification"]
+            if params_verification["verification_result"]:
+                print("✅ VERIFICATION SUCCESSFUL - SIGNATURE VALID")
+                print(f"  Match Count: {params_verification['match_count']}")
+
+                # Show the most recent match
+                if params_verification.get("matches"):
+                    most_recent = params_verification["matches"][-1]
+                    print(f"  Most Recent Verified Transaction:")
+                    print(f"    Transaction ID: {most_recent['transaction_id']}")
+                    print(f"    Date: {most_recent['date']}")
+            else:
+                print("❌ VERIFICATION FAILED - NO VALID SIGNATURE")
+                print("  No matching records found with valid signatures")
+
+        # Overall conclusion
+        print("\n" + "=" * 80)
+        print("SECURE AUDIT CONCLUSION:")
+        if report["all_verified"]:
+            print(
+                "✅ All files and parameters have been CRYPTOGRAPHICALLY verified successfully."
+            )
+            print("Both data integrity and AUTHENTICITY are confirmed.")
+            print(
+                "The signatures prove these files were registered by the genuine key owner."
+            )
         else:
-            print("❌ VERIFICATION FAILED - NO VALID SIGNATURE")
-            print("  No matching records found with valid signatures")
-
-    # Overall conclusion
-    print("\n" + "=" * 80)
-    print("SECURE AUDIT CONCLUSION:")
-    if report["all_verified"]:
-        print(
-            "✅ All files and parameters have been CRYPTOGRAPHICALLY verified successfully."
-        )
-        print("Both data integrity and AUTHENTICITY are confirmed.")
-        print(
-            "The signatures prove these files were registered by the genuine key owner."
-        )
-    else:
-        print(
-            "❌ Some cryptographic verifications failed. See the detailed report above."
-        )
-        print(
-            "Either the files/parameters have been modified, the signatures are invalid,"
-        )
-        print("or the wrong public key was used for verification.")
-    print("=" * 80)
+            print(
+                "❌ Some cryptographic verifications failed. See the detailed report above."
+            )
+            print(
+                "Either the files/parameters have been modified, the signatures are invalid,"
+            )
+            print("or the wrong public key was used for verification.")
+        print("=" * 80)

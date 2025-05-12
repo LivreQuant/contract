@@ -2,9 +2,11 @@
 import logging
 import argparse
 import time
+import json
 from pathlib import Path
 
 # Import our config module
+import config
 from services.wallet_service import (
     get_or_create_user_wallet,
     ensure_user_wallet_funded,
@@ -168,7 +170,7 @@ def run_full_workflow(
                 user_id=user_id,
                 book_id=book_id,
                 book_file_path=book_file,
-                store_files=True,  # Store a copy of the file
+                store_files=False,  # Store a copy of the file
             )
 
         if success:
@@ -203,7 +205,7 @@ def run_full_workflow(
     # Check if files exist
     if second_book_file.exists():
         # Choose the appropriate update method based on use_crypto flag
-        if use_crypto:
+        if use_encrypt:
             # Use secure cryptographic signing
             success = file_service.update_contract_with_signed_hashes(
                 user_id=user_id,
@@ -231,7 +233,7 @@ def run_full_workflow(
                     "version": "2.0",
                     "description": "Updated submission",
                 },
-                store_files=True,
+                store_files=False,
             )
 
         if success:
@@ -321,7 +323,7 @@ def run_full_workflow(
     logger.info(f"Step 8 completed in {time.time() - step8_start:.2f} seconds")
 
     # Step 8.5: Verify files using the secure audit service if crypto was used
-    if use_crypto:
+    if use_encrypt:
         logger.info("STEP 8.5: Verify files using secure cryptographic verification")
         step85_start = time.time()
 

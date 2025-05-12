@@ -10,8 +10,13 @@ __pycache__/
 /wallets
 *.wallet.json
 
+# Database
+/db
+
 # Keys
 /secure
+/secure/keys
+*.pem
 
 # Files
 /files

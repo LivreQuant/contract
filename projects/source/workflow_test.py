@@ -3,7 +3,6 @@ import logging
 import argparse
 import time
 import json
-import datetime
 from pathlib import Path
 
 # Import our config module
@@ -352,6 +351,9 @@ def run_full_workflow(
 
             # Files to verify
             files_to_verify = []
+            if book_file.exists():
+                files_to_verify.append({"path": str(book_file), "type": "book"})
+
             if second_book_file.exists():
                 files_to_verify.append({"path": str(second_book_file), "type": "book"})
 

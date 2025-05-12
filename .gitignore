@@ -12,7 +12,10 @@ __pycache__/
 
 # Storage
 /projects/source/storage
-/projects/source/db
+/projects/source/db/contracts/*.json
+/projects/source/db/explorer/*.json
+/projects/source/db/explorer/*.csv
+/projects/source/db/wallets/*.json
 
 # Distribution / packaging
 .Python

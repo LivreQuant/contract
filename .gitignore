@@ -10,6 +10,9 @@ __pycache__/
 /wallets
 *.wallet.json
 
+# Keys
+/secure
+
 # Storage
 /projects/source/storage
 /projects/source/db/contracts/*.json

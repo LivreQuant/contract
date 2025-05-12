@@ -1,17 +1,13 @@
 # workflow_test.py
 import logging
 import argparse
-import json
 import time
-import base64
 from pathlib import Path
 
 # Import our config module
-import config
 from services.wallet_service import (
     get_or_create_user_wallet,
     ensure_user_wallet_funded,
-    get_wallet_credentials,
 )
 from services.contract_service import (
     get_contract_for_user_book,
@@ -46,7 +42,11 @@ def wait_for_prompt(message):
 
 
 def run_full_workflow(
-    user_id: str, book_id: str, funding_amount: float = 1.0, interactive: bool = True
+    user_id: str,
+    book_id: str,
+    funding_amount: float = 1.0,
+    interactive: bool = True,
+    use_encrypt: bool = True,
 ):
     """Run the complete workflow from wallet creation to contract deletion.
 
@@ -55,10 +55,13 @@ def run_full_workflow(
         book_id: Book identifier
         funding_amount: Amount to fund the user wallet with (in Algos)
         interactive: Whether to pause between steps
+        use_encrypt: Encrypt file hashes
     """
 
     logger.info("-" * 80)
     logger.info(f"STARTING WORKFLOW: user_id={user_id}, book_id={book_id}")
+    if use_encrypt:
+        logger.info("USING SECURE CRYPTOGRAPHIC VERIFICATION")
     logger.info("-" * 80)
 
     start_time = time.time()
@@ -146,13 +149,27 @@ def run_full_workflow(
 
     # Check if file exists
     if book_file.exists():
-        # Update contract with book file hash only (no research file, no params)
-        success = file_service.update_contract_with_file_hashes(
-            user_id=user_id,
-            book_id=book_id,
-            book_file_path=book_file,
-            store_files=True,  # Store a copy of the file
-        )
+        # Choose the appropriate update method based on use_crypto flag
+        if use_encrypt:
+            # Use secure cryptographic signing
+            success = file_service.update_contract_with_signed_hashes(
+                user_id=user_id,
+                book_id=book_id,
+                book_file_path=book_file,
+                private_key_path=Path(config.PRIVATE_KEY_PATH) / "private_key.pem",
+                store_files=False,  # Store a copy of the file
+                passphrase=(
+                    config.SECRET_PASS_PHRASE if config.ENCRYPT_PRIVATE_KEYS else None
+                ),  # Pass passphrase if key is encrypted
+            )
+        else:
+            # Update contract with book file hash only (no research file, no params)
+            success = file_service.update_contract_with_file_hashes(
+                user_id=user_id,
+                book_id=book_id,
+                book_file_path=book_file,
+                store_files=True,  # Store a copy of the file
+            )
 
         if success:
             logger.info("Local state update with book hash successful")
@@ -185,15 +202,37 @@ def run_full_workflow(
 
     # Check if files exist
     if second_book_file.exists():
-        # Update contract with book file hash and optional research file
-        success = file_service.update_contract_with_file_hashes(
-            user_id=user_id,
-            book_id=book_id,
-            book_file_path=second_book_file,
-            research_file_path=research_file if research_file.exists() else None,
-            additional_params={"version": "2.0", "description": "Updated submission"},
-            store_files=True,
-        )
+        # Choose the appropriate update method based on use_crypto flag
+        if use_crypto:
+            # Use secure cryptographic signing
+            success = file_service.update_contract_with_signed_hashes(
+                user_id=user_id,
+                book_id=book_id,
+                book_file_path=second_book_file,
+                private_key_path=Path(config.PRIVATE_KEY_PATH),  # Use path from config
+                research_file_path=research_file if research_file.exists() else None,
+                additional_params={
+                    "version": "2.0",
+                    "description": "Updated submission",
+                },
+                store_files=False,
+                passphrase=(
+                    config.SECRET_PASS_PHRASE if config.ENCRYPT_PRIVATE_KEYS else None
+                ),
+            )
+        else:
+            # Update contract with book file hash and optional research file
+            success = file_service.update_contract_with_file_hashes(
+                user_id=user_id,
+                book_id=book_id,
+                book_file_path=second_book_file,
+                research_file_path=research_file if research_file.exists() else None,
+                additional_params={
+                    "version": "2.0",
+                    "description": "Updated submission",
+                },
+                store_files=True,
+            )
 
         if success:
             if research_file.exists():
@@ -281,6 +320,87 @@ def run_full_workflow(
         logger.error(f"Error exploring contract: {e}")
     logger.info(f"Step 8 completed in {time.time() - step8_start:.2f} seconds")
 
+    # Step 8.5: Verify files using the secure audit service if crypto was used
+    if use_crypto:
+        logger.info("STEP 8.5: Verify files using secure cryptographic verification")
+        step85_start = time.time()
+
+        try:
+            # Initialize the CSV path
+            csv_path = (
+                Path("db")
+                / "explorer"
+                / f"{user_id}_{book_id}_{app_id}_transactions.csv"
+            )
+            if not csv_path.exists():
+                logger.warning(
+                    f"CSV file not found at {csv_path}, checking for alternative paths"
+                )
+                # Try to find any CSV for this app_id
+                csv_files = list(Path("db/explorer").glob(f"*_{app_id}_*.csv"))
+                if csv_files:
+                    csv_path = csv_files[0]
+                    logger.info(f"Using alternative CSV file: {csv_path}")
+                else:
+                    logger.error("No transaction CSV files found for verification")
+                    raise FileNotFoundError("No transaction CSV files found")
+
+            # Import the secure verification service
+            from services.audit_verification_service import AuditVerificationService
+
+            # Initialize the service
+            service = AuditVerificationService(csv_path)
+
+            # Files to verify
+            files_to_verify = []
+            if second_book_file.exists():
+                files_to_verify.append({"path": str(second_book_file), "type": "book"})
+
+            if research_file.exists():
+                files_to_verify.append({"path": str(research_file), "type": "research"})
+
+            # Parameters for verification
+            params_dict = {
+                "book_file": second_book_file.name,
+                "user": user_id,
+                "book": book_id,
+                "version": "2.0",
+                "description": "Updated submission",
+            }
+
+            if research_file.exists():
+                params_dict["research_file"] = research_file.name
+
+            # Perform the secure verification
+            public_key_path = Path(config.PUBLIC_KEY_PATH)
+            report = service.generate_secure_audit_report(
+                files_to_verify=files_to_verify,
+                params_dict=params_dict,
+                public_key_path=public_key_path,
+            )
+
+            # Print the report
+            service.print_secure_audit_report(report)
+
+            # Save the report
+            report_path = Path("audit_report.json")
+            with open(report_path, "w") as f:
+                json.dump(report, f, indent=2)
+
+            logger.info(f"Secure audit report saved to {report_path}")
+            logger.info(
+                f"Step 8.5 completed in {time.time() - step85_start:.2f} seconds"
+            )
+
+        except Exception as e:
+            logger.error(f"Error performing secure verification: {e}")
+            import traceback
+
+            traceback.print_exc()
+
+    if interactive:
+        input("Press Enter to continue to Step 9: Delete contract...")
+
     if interactive:
         wait_for_prompt("Press Enter to continue to Step 9: Delete contract...")
 
@@ -318,6 +438,11 @@ def main():
         action="store_true",
         help="Run without pauses between steps",
     )
+    parser.add_argument(
+        "--secure",
+        action="store_true",
+        help="Use cryptographic signing for enhanced security",
+    )
 
     args = parser.parse_args()
 
@@ -327,6 +452,7 @@ def main():
         args.book_id,
         funding_amount=args.funding,
         interactive=not args.non_interactive,
+        use_encrypt=args.secure,
     )
 
 

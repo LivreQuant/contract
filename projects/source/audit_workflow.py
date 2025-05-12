@@ -1,6 +1,6 @@
 # audit_verification_tool.py
 import json
-import sys
+import json
 from pathlib import Path
 
 from services.audit_verification_service import AuditVerificationService

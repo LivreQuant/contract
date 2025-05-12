@@ -118,6 +118,7 @@ class FileIntegrityService:
         """
         try:
             from services.crypto_service import sign_hash, load_private_key
+            from cryptography.hazmat.primitives import serialization
 
             # Load private key with passphrase if provided
             private_key = load_private_key(private_key_path, passphrase)

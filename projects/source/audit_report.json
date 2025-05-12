@@ -1,0 +1,35 @@
+{
+  "audit_date": "2025-05-12 16:35:19",
+  "csv_file": "db/explorer/test_user_001_test_book_002_1496_transactions.csv",
+  "transaction_count": 7,
+  "public_key_path": "/home/samaral/projects/algo/20250508/contract/projects/source/secure/keys/default_public_key.pem",
+  "file_verifications": [
+    {
+      "verified": true,
+      "file": "market_stream_20250505T195600_update.csv",
+      "hash_match": true,
+      "signature_valid": true,
+      "signature_hash_match": true,
+      "timestamp": 1747067699.2552257
+    },
+    {
+      "verified": true,
+      "file": "factsheet.jpg",
+      "hash_match": true,
+      "signature_valid": true,
+      "signature_hash_match": true,
+      "timestamp": 1747067699.2552257
+    }
+  ],
+  "params_verification": {
+    "verified": true,
+    "params_str": "book:test_book_002|book_file:market_stream_20250505T195600_update.csv|description:Updated submission|research_file:factsheet.jpg|user:test_user_001|version:2.0",
+    "original_params_str": "book:test_book_002|book_file:market_stream_20250505T195600_update.csv|description:Updated submission|research_file:factsheet.jpg|user:test_user_001|version:2.0",
+    "params_match": true,
+    "param_keys_match": false,
+    "signature_valid": true,
+    "signature_hash_match": true,
+    "timestamp": 1747067699.2552257
+  },
+  "all_verified": true
+}

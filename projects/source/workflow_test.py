@@ -3,6 +3,7 @@ import logging
 import argparse
 import time
 import json
+import datetime
 from pathlib import Path
 
 # Import our config module
@@ -151,15 +152,14 @@ def run_full_workflow(
 
     # Check if file exists
     if book_file.exists():
-        # Choose the appropriate update method based on use_crypto flag
+        # Choose the appropriate update method based on use_encrypt flag
         if use_encrypt:
             # Use secure cryptographic signing
             success = file_service.update_contract_with_signed_hashes(
                 user_id=user_id,
                 book_id=book_id,
                 book_file_path=book_file,
-                private_key_path=Path(config.PRIVATE_KEY_PATH) / "private_key.pem",
-                store_files=False,  # Store a copy of the file
+                private_key_path=Path(config.PRIVATE_KEY_PATH),
                 passphrase=(
                     config.SECRET_PASS_PHRASE if config.ENCRYPT_PRIVATE_KEYS else None
                 ),  # Pass passphrase if key is encrypted
@@ -170,7 +170,6 @@ def run_full_workflow(
                 user_id=user_id,
                 book_id=book_id,
                 book_file_path=book_file,
-                store_files=False,  # Store a copy of the file
             )
 
         if success:
@@ -204,7 +203,7 @@ def run_full_workflow(
 
     # Check if files exist
     if second_book_file.exists():
-        # Choose the appropriate update method based on use_crypto flag
+        # Choose the appropriate update method based on use_encrypt flag
         if use_encrypt:
             # Use secure cryptographic signing
             success = file_service.update_contract_with_signed_hashes(
@@ -217,7 +216,6 @@ def run_full_workflow(
                     "version": "2.0",
                     "description": "Updated submission",
                 },
-                store_files=False,
                 passphrase=(
                     config.SECRET_PASS_PHRASE if config.ENCRYPT_PRIVATE_KEYS else None
                 ),
@@ -233,7 +231,6 @@ def run_full_workflow(
                     "version": "2.0",
                     "description": "Updated submission",
                 },
-                store_files=False,
             )
 
         if success:
@@ -375,14 +372,18 @@ def run_full_workflow(
 
             # Perform the secure verification
             public_key_path = Path(config.PUBLIC_KEY_PATH)
-            report = service.generate_secure_audit_report(
+            csv_path = (
+                Path("db/explorer") / f"{user_id}_{book_id}_{app_id}_transactions.csv"
+            )
+            report = file_service.generate_secure_audit_report(
                 files_to_verify=files_to_verify,
                 params_dict=params_dict,
                 public_key_path=public_key_path,
+                csv_path=csv_path,
             )
 
             # Print the report
-            service.print_secure_audit_report(report)
+            file_service.print_secure_audit_report(report)
 
             # Save the report
             report_path = Path("audit_report.json")
@@ -440,11 +441,6 @@ def main():
         action="store_true",
         help="Run without pauses between steps",
     )
-    parser.add_argument(
-        "--secure",
-        action="store_true",
-        help="Use cryptographic signing for enhanced security",
-    )
 
     args = parser.parse_args()
 
@@ -454,7 +450,7 @@ def main():
         args.book_id,
         funding_amount=args.funding,
         interactive=not args.non_interactive,
-        use_encrypt=args.secure,
+        use_encrypt=True,
     )
 
 
